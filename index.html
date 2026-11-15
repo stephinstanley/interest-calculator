@@ -137,6 +137,16 @@
     .sheet-lbl { display:block; font-weight:700; font-size:16px; margin:0 0 6px; color:var(--text-2); }
     .sheet .affix { margin-bottom:10px; }
     .sheet #cfgRate { font-weight:700; font-size:22px; }
+    .methods { display:grid; gap:6px; }
+    .method { position:relative; display:block; }
+    .method input { position:absolute; opacity:0; width:1px; height:1px; min-height:0; }
+    .method span { display:block; border:1.5px solid var(--field); border-radius:var(--r-md); padding:9px 12px 9px 40px; position:relative; }
+    .method span::before { content:""; position:absolute; left:13px; top:13px; width:16px; height:16px; border-radius:50%; border:2px solid var(--field); background:#fff; }
+    .method b { display:block; font-size:16px; }
+    .method small { display:block; font-size:14px; color:var(--text-2); line-height:1.3; }
+    .method input:checked + span { border-color:var(--ink); background:var(--gold-tint); }
+    .method input:checked + span::before { border:5px solid var(--ink); }
+    .method input:focus-visible + span { outline:3px solid var(--gold); outline-offset:1px; }
     .sheet-actions { display:grid; grid-template-columns:1fr 1.4fr; gap:10px; margin-top:16px; }
 
     .clear { display:block; margin:14px auto 0; color:var(--text-2) !important; }
@@ -258,6 +268,12 @@
       <label><input type="radio" name="cfgBasis" value="monthly"><span data-t="perMonthLong">Per month</span></label>
       <label><input type="radio" name="cfgBasis" value="annual"><span data-t="perYearLong">Per year</span></label>
     </div>
+    <div class="sheet-lbl" style="margin-top:14px" data-t="method">Calculation</div>
+    <div class="methods" role="radiogroup">
+      <label class="method"><input type="radio" name="cfgMethod" value="daily"><span><b data-t="mDaily">Exact days</b><small data-t="mDailySub"></small></span></label>
+      <label class="method"><input type="radio" name="cfgMethod" value="mdays"><span><b data-t="mMd">Months + days</b><small data-t="mMdSub"></small></span></label>
+      <label class="method"><input type="radio" name="cfgMethod" value="m30"><span><b data-t="m30">30-day months</b><small data-t="m30Sub"></small></span></label>
+    </div>
     <div class="sheet-actions">
       <button type="button" class="btn ghost" id="setupCancel" data-t="cancel">Cancel</button>
       <button type="submit" class="btn" id="setupSave" data-t="save">Save</button>
@@ -285,7 +301,10 @@
       principal: 'Principal', interest: 'Interest', perMonth: 'Interest per month', period: 'Period',
       beforeDiscount: 'Total before discount', beforeRound: 'Before round-off',
       years: n => `${n} year${n === 1 ? '' : 's'}`, months: n => `${n} month${n === 1 ? '' : 's'}`, days: n => `${n} day${n === 1 ? '' : 's'}`,
-      note: 'Simple interest. Per month counts 30 days as a month; per year counts 365 days.',
+      simple: 'Simple interest.', method: 'How interest is counted', perDay: 'Interest per day',
+      mDaily: 'Exact days (like banks)', mDailySub: 'Every day counts: yearly rate ÷ 365 per day.',
+      mMd: 'Months + days', mMdSub: 'Full calendar months, then extra days at monthly interest ÷ 30.',
+      m30: '30-day months', m30Sub: 'Total days ÷ 30 = months.',
       monthShort: 'month', yearShort: 'year', setupTitle: 'Interest setup', rateLabel: 'Interest rate',
       setupNote: 'Used for every calculation. Change it only when your rate changes.',
       perMonthLong: 'Per month', perYearLong: 'Per year', save: 'Save', cancel: 'Cancel',
@@ -308,7 +327,10 @@
       principal: 'அசல்', interest: 'வட்டி', perMonth: 'மாத வட்டி', period: 'காலம்',
       beforeDiscount: 'தள்ளுபடிக்கு முன்', beforeRound: 'ரவுண்ட் ஆஃப் முன்',
       years: n => `${n} ஆண்டு`, months: n => `${n} மாதம்`, days: n => `${n} நாள்`,
-      note: 'தனி வட்டி. மாதத்திற்கு: 30 நாள் = ஒரு மாதம்; ஆண்டுக்கு: 365 நாள்.',
+      simple: 'தனி வட்டி.', method: 'வட்டி கணக்கிடும் முறை', perDay: 'நாள் வட்டி',
+      mDaily: 'சரியான நாட்கள் (வங்கிகள் போல)', mDailySub: 'ஒவ்வொரு நாளும் கணக்கு: ஆண்டு வட்டி ÷ 365 ஒரு நாளுக்கு.',
+      mMd: 'மாதம் + நாட்கள்', mMdSub: 'முழு மாதங்கள், மீதி நாட்களுக்கு மாத வட்டி ÷ 30.',
+      m30: '30 நாள் மாதம்', m30Sub: 'மொத்த நாட்கள் ÷ 30 = மாதங்கள்.',
       monthShort: 'மாதம்', yearShort: 'ஆண்டு', setupTitle: 'வட்டி அமைப்பு', rateLabel: 'வட்டி விகிதம்',
       setupNote: 'ஒவ்வொரு கணக்கிற்கும் இது பயன்படும். வட்டி மாறினால் மட்டும் மாற்றவும்.',
       perMonthLong: 'மாதத்திற்கு', perYearLong: 'ஆண்டுக்கு', save: 'சேமி', cancel: 'ரத்து',
@@ -331,7 +353,10 @@
       principal: 'മുതൽ', interest: 'പലിശ', perMonth: 'മാസ പലിശ', period: 'കാലയളവ്',
       beforeDiscount: 'ഇളവിന് മുമ്പ്', beforeRound: 'റൗണ്ട് ഓഫിന് മുമ്പ്',
       years: n => `${n} വർഷം`, months: n => `${n} മാസം`, days: n => `${n} ദിവസം`,
-      note: 'സാധാരണ പലിശ. മാസത്തിന്: 30 ദിവസം = ഒരു മാസം; വർഷത്തിന്: 365 ദിവസം.',
+      simple: 'സാധാരണ പലിശ.', method: 'പലിശ കണക്കാക്കുന്ന രീതി', perDay: 'ദിവസ പലിശ',
+      mDaily: 'കൃത്യമായ ദിവസങ്ങൾ (ബാങ്കുകളെ പോലെ)', mDailySub: 'ഓരോ ദിവസവും കണക്കാക്കും: വാർഷിക പലിശ ÷ 365 ഒരു ദിവസത്തിന്.',
+      mMd: 'മാസം + ദിവസം', mMdSub: 'മുഴുവൻ മാസങ്ങൾ, ബാക്കി ദിവസങ്ങൾക്ക് മാസ പലിശ ÷ 30.',
+      m30: '30 ദിവസ മാസം', m30Sub: 'ആകെ ദിവസം ÷ 30 = മാസം.',
       monthShort: 'മാസം', yearShort: 'വർഷം', setupTitle: 'പലിശ ക്രമീകരണം', rateLabel: 'പലിശ നിരക്ക്',
       setupNote: 'എല്ലാ കണക്കിനും ഇത് ഉപയോഗിക്കും. നിരക്ക് മാറിയാൽ മാത്രം മാറ്റുക.',
       perMonthLong: 'മാസത്തിന്', perYearLong: 'വർഷത്തിന്', save: 'സേവ് ചെയ്യുക', cancel: 'റദ്ദാക്കുക',
@@ -381,15 +406,19 @@
   };
 
   // ---------- Interest setup: set once, remembered on this phone ----------
-  let cfg = { rate: 1.5, basis: 'monthly' };
+  // method: 'daily' = exact days like banks (yearly rate ÷ 365 per day), 'mdays' = whole months + extra days ÷ 30, 'm30' = total days ÷ 30.
+  const METHODS = ['daily', 'mdays', 'm30'];
+  let cfg = { rate: 1.5, basis: 'monthly', method: 'daily' };
   try {
     const saved = JSON.parse(localStorage.getItem('interestCfg') || 'null');
-    if (saved && saved.rate >= 0 && (saved.basis === 'monthly' || saved.basis === 'annual')) cfg = saved;
+    if (saved && saved.rate >= 0 && (saved.basis === 'monthly' || saved.basis === 'annual')) cfg = { ...cfg, ...saved };
+    if (!METHODS.includes(cfg.method)) cfg.method = 'daily';
   } catch (e) {}
   const showCfg = () => { $('rateChipText').textContent = `${cfg.rate}% / ${t(cfg.basis === 'annual' ? 'yearShort' : 'monthShort')}`; };
   $('rateChip').addEventListener('click', () => {
     $('cfgRate').value = cfg.rate;
     document.querySelector(`input[name="cfgBasis"][value="${cfg.basis}"]`).checked = true;
+    document.querySelector(`input[name="cfgMethod"][value="${cfg.method}"]`).checked = true;
     $('setup').showModal();
   });
   $('setupCancel').addEventListener('click', () => $('setup').close());
@@ -397,7 +426,7 @@
   $('setupForm').addEventListener('submit', () => {
     const rate = Number($('cfgRate').value);
     if (!($('cfgRate').value !== '' && rate >= 0)) return;
-    cfg = { rate, basis: document.querySelector('input[name="cfgBasis"]:checked').value };
+    cfg = { rate, basis: document.querySelector('input[name="cfgBasis"]:checked').value, method: document.querySelector('input[name="cfgMethod"]:checked').value };
     try { localStorage.setItem('interestCfg', JSON.stringify(cfg)); } catch (e) {}
     showCfg(); calc();
   });
@@ -521,8 +550,14 @@
 
     const days = Math.round((end - start) / 86400000);
     const basis = cfg.basis;
-    const periods = basis === 'annual' ? days / 365 : days / 30;
-    const interest = principal * (rate / 100) * periods;
+    const yearly = basis === 'annual' ? rate : rate * 12;     // % a year
+    const monthly = basis === 'monthly' ? rate : rate / 12;   // % a month
+    const md = monthsAndDays(start, end);
+    const interest =
+      cfg.method === 'daily' ? principal * yearly / 100 * days / 365 :              // banks: per day, 365-day year
+      cfg.method === 'mdays' ? principal * monthly / 100 * (md.months + md.days / 30) :
+                               principal * monthly / 100 * days / 30;
+    const perDay = cfg.method === 'daily' ? principal * yearly / 100 / 365 : principal * monthly / 100 / 30;
     const subtotal = principal + interest;
 
     // Discount
@@ -559,16 +594,17 @@
     $('bill').hidden = $('detailsBtn').getAttribute('aria-expanded') !== 'true';
 
     // Full bill (behind "Details")
-    const perMonth = basis === 'monthly' ? principal * rate / 100 : principal * rate / 1200;
+    const perMonth = principal * monthly / 100;
     const line = (k, v, cls = '') => `<div class="line ${cls}"><span>${k}</span><strong>${v}</strong></div>`;
     $('bill').innerHTML =
       line(t('principal'), money(principal)) +
       line(`${t('interest')} (${cfg.rate}% / ${t(basis === 'annual' ? 'yearShort' : 'monthShort')})`, money(interest), 'gold') +
       line(t('perMonth'), money(perMonth)) +
+      line(t('perDay'), money(perDay)) +
       line(t('period'), periodText(start, end, days, true)) +
       (hasDisc ? line(t('beforeDiscount'), money(subtotal)) + line(`${t('discount')} (${pct}%)`, '−' + money(diff), 'good') : '') +
       (hasRound ? line(t('beforeRound'), money(afterDisc)) + line(t('roundoff'), (roundDiff < 0 ? '−' : '+') + money(Math.abs(roundDiff))) : '') +
-      `<p class="note">${t('note')}</p>`;
+      `<p class="note">${t('simple')} ${t({ daily: 'mDailySub', mdays: 'mMdSub', m30: 'm30Sub' }[cfg.method])}</p>`;
   };
   form.addEventListener('input', calc);
   form.addEventListener('change', calc);
