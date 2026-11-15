@@ -9,7 +9,7 @@ Plain HTML/CSS/JS installable web app (no build step) for working out simple int
 - `icons/icon.svg` — icon source. PNGs made with `qlmanage -t -s 512` and `sips -z` (no ImageMagick on this Mac).
 
 ## Calculation
-Simple interest = Principal × Rate/100 × Period. Rate period: **Full term** (default; Period = 1, dates don't change it), Per month (days/30), Per year (days/365).
+Simple interest = Principal × Rate/100 × Period. Defaults: rate 1.5, Per month (the family's usual rate: ₹1.5 per ₹100 per month). Rate periods: Full term (Period = 1, dates don't change it), Per month (days/30), Per year (days/365).
 Optional discount, as ₹ amount or %, is taken off the total (principal + interest), capped at the total.
 
 ## Dates
