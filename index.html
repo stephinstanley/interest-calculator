@@ -51,6 +51,8 @@
     .hero .cap { font-size:15px; color:var(--on-dark-2); }
     .hero .total { font-size:42px; line-height:1.1; font-weight:800; margin:4px 0 6px; overflow-wrap:anywhere; letter-spacing:-1px; color:var(--gold-hi); }
     .hero .total.empty { color:#ffffff40; }
+    .hero .words { font-size:15px; color:var(--gold-hi); opacity:.85; margin:-2px 0 6px; line-height:1.3; }
+    .hero .words:empty { display:none; }
     .hero .sum { font-size:16px; color:var(--on-dark-2); }
     .hero .sum b { color:var(--on-dark); font-weight:700; }
     .hero .sum .gold { color:var(--gold-hi); }
@@ -174,6 +176,7 @@
       </button>
     </div>
     <div id="total" class="total empty">₹0</div>
+    <div id="totalWords" class="words"></div>
     <div id="err" class="err" role="alert" hidden></div>
     <div id="sum" class="sum"></div>
     <button type="button" class="details-btn" id="detailsBtn" aria-expanded="false" aria-controls="bill" hidden>
@@ -187,7 +190,10 @@
     <div class="rows">
       <div class="row">
         <label class="lbl" for="principal" data-t="amount">Amount</label>
-        <div class="affix pre"><span>₹</span><input id="principal" type="number" inputmode="decimal" min="0" step="0.01" placeholder="50000"></div>
+        <div>
+          <div class="affix pre"><span>₹</span><input id="principal" type="number" inputmode="decimal" min="0" step="0.01" placeholder="50000"></div>
+          <div class="dhint" id="amtWords"></div>
+        </div>
       </div>
 
       <div class="row">
@@ -343,6 +349,31 @@
   const t = (key, vars = {}) => String(L()[key] ?? I18N.en[key]).replace(/\{(\w+)\}/g, (_, k) => vars[k]);
 
   // Money: no paise when it's a whole number (₹57,530), otherwise 2 decimals.
+  // ---------- Amount in words (Indian system: thousand, lakh, crore) ----------
+  const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+  const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  const two = n => n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : '');
+  const three = n => [n >= 100 ? ONES[Math.floor(n / 100)] + ' hundred' : '', n % 100 ? two(n % 100) : ''].filter(Boolean).join(' ');
+  const enWords = n => {
+    if (n === 0) return 'zero';
+    const crore = Math.floor(n / 1e7), lakh = Math.floor(n % 1e7 / 1e5), thou = Math.floor(n % 1e5 / 1e3), rest = n % 1000;
+    return [crore ? enWords(crore) + ' crore' : '', lakh ? two(lakh) + ' lakh' : '', thou ? two(thou) + ' thousand' : '', rest ? three(rest) : ''].filter(Boolean).join(' ');
+  };
+  // Tamil / Malayalam: digits with the unit words people say (58 ஆயிரம் 25), which reads naturally and avoids long spelled-out numbers.
+  const UNITS = { ta: ['கோடி', 'லட்சம்', 'ஆயிரம்', 'ரூபாய்', 'பைசா'], ml: ['കോടി', 'ലക്ഷം', 'ആയിരം', 'രൂപ', 'പൈസ'] };
+  const amountWords = amount => {
+    if (!(amount >= 0) || !isFinite(amount) || amount >= 1e13) return '';
+    const total = Math.round(amount * 100), rupees = Math.floor(total / 100), paise = total % 100;
+    if (lang === 'en') {
+      const w = enWords(rupees);
+      return w[0].toUpperCase() + w.slice(1) + ' rupee' + (rupees === 1 ? '' : 's') + (paise ? ` and ${two(paise)} paise` : '');
+    }
+    const [cr, lk, th, rs, ps] = UNITS[lang];
+    const crore = Math.floor(rupees / 1e7), lakh = Math.floor(rupees % 1e7 / 1e5), thou = Math.floor(rupees % 1e5 / 1e3), rest = rupees % 1000;
+    const parts = [crore ? `${crore} ${cr}` : '', lakh ? `${lakh} ${lk}` : '', thou ? `${thou} ${th}` : '', rest || !rupees ? String(rest) : ''].filter(Boolean);
+    return `${parts.join(' ')} ${rs}` + (paise ? ` ${paise} ${ps}` : '');
+  };
+
   const money = n => {
     const r = Math.round(n * 100) / 100;
     const whole = Math.abs(r % 1) < 0.005;
@@ -472,10 +503,11 @@
     const fail = msg => {
       $('err').textContent = msg; $('err').hidden = false;
       $('sum').innerHTML = ''; $('detailsBtn').hidden = true; $('bill').hidden = true; $('dnote').hidden = true;
-      $('total').textContent = '₹0'; $('total').classList.add('empty');
+      $('total').textContent = '₹0'; $('total').classList.add('empty'); $('totalWords').textContent = '';
     };
     $('err').hidden = true;
     readFrom(); if (!toIsToday) readTo();
+    $('amtWords').textContent = $('principal').value === '' ? '' : amountWords(Number($('principal').value));
     if ($('principal').value === '') {
       fail(''); $('err').hidden = true; $('sum').textContent = t('enterAmount'); return;
     }
@@ -519,6 +551,7 @@
 
     // Answer panel
     $('total').textContent = money(total);
+    $('totalWords').textContent = amountWords(total);
     $('total').classList.remove('empty');
     const extra = [hasDisc ? `<span class="good">−${money(diff)} ${t('discount').toLowerCase()}</span>` : '', hasRound ? `${roundDiff < 0 ? '−' : '+'}${money(Math.abs(roundDiff))} ${t('roundoff').toLowerCase()}` : ''].filter(Boolean).join(' · ');
     $('sum').innerHTML = `<div>${t('sumLine', { p: `<b>${money(principal)}</b>`, i: `<b class="gold">${money(interest)}</b>` })}</div><div>${periodText(start, end, days, false)}${extra ? ' · ' + extra : ''}</div>`;

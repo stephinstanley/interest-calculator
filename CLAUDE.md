@@ -39,6 +39,7 @@ English, Tamil, Malayalam (EN | த | മ at the top right; choice saved in loca
 ## Dates
 Typed on the number pad, the way the pledge receipt shows it (`DD/MM/YYYY`). It replaced the native picker and then the day/month/year dropdowns; Stephin found both annoying.
 - Slashes are added automatically (`29122025` → `29/12/2025`), and the caret is kept in place on edits/backspace.
+- **No calendar picker.** A custom bottom-sheet calendar (day grid + month/year grid) was built on Sun, 15-Nov-2026 and removed the same day: Stephin found it "confusing" and said to leave pickers out if they're all like that. Don't re-add one without asking.
 - A 2-digit year (`291225`) is accepted only when leaving the box, then expanded to `29/12/2025`, so typing "2025" doesn't flash 2020 at "20".
 - Under the box: the date in words (`Mon, 29-Dec-2025`), or red "This date does not exist" for 31/02.
 - **To** defaults to a "Today · 15-Nov-2026 ✎" button; tapping it opens the same typed box (prefilled with today) plus a "Use today" link.
