@@ -23,6 +23,13 @@
     .card { background:var(--card); border-radius:18px; padding:20px; box-shadow:0 5px 22px #10251a0c; margin-bottom:16px; }
     label { display:block; font-weight:650; margin:14px 0 6px; }
     input, select { width:100%; min-height:48px; border:1px solid #d5ddd7; border-radius:11px; padding:10px 12px; font:inherit; background:#fff; color:#18231d; }
+    fieldset.date { border:0; padding:0; margin:0; min-width:0; }
+    fieldset.date legend { font-weight:650; margin:14px 0 6px; padding:0; }
+    .dmy { display:grid; grid-template-columns:1fr 1.4fr 1.3fr; gap:8px; }
+    .dmy select { padding:10px 8px; }
+    .date-note { display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:13px; margin-top:4px; }
+    .date-note .bad { color:#a12d2d; font-weight:600; }
+    button.link { width:auto; min-height:32px; margin:0; padding:4px 8px; background:none; color:var(--green); font-weight:700; text-decoration:underline; }
     .two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     button { width:100%; border:0; border-radius:12px; min-height:50px; padding:12px 16px; font:inherit; font-weight:700; background:var(--green); color:white; margin-top:18px; }
     .result { background:#e7f0e9; border-radius:14px; padding:16px; margin-top:18px; }
@@ -64,16 +71,25 @@
         </div>
       </div>
 
-      <div class="two">
-        <div>
-          <label for="start">Starting date</label>
-          <input id="start" type="date" required>
+      <fieldset class="date" id="start">
+        <legend>Starting date</legend>
+        <div class="dmy">
+          <select aria-label="Start day" data-part="d"></select>
+          <select aria-label="Start month" data-part="m"></select>
+          <select aria-label="Start year" data-part="y"></select>
         </div>
-        <div>
-          <label for="end">End date</label>
-          <input id="end" type="date" required>
+        <div class="date-note"><span data-show></span><button type="button" class="link" data-today>Today</button></div>
+      </fieldset>
+
+      <fieldset class="date" id="end">
+        <legend>End date</legend>
+        <div class="dmy">
+          <select aria-label="End day" data-part="d"></select>
+          <select aria-label="End month" data-part="m"></select>
+          <select aria-label="End year" data-part="y"></select>
         </div>
-      </div>
+        <div class="date-note"><span data-show></span><button type="button" class="link" data-today>Today</button></div>
+      </fieldset>
       <div class="two">
         <div>
           <label for="discount">Discount (optional)</label>
@@ -108,12 +124,38 @@
 </main>
 <script>
   const $ = id => document.getElementById(id);
+  // Date pickers: three dropdowns (day / month / year) instead of the native calendar.
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const pad = n => String(n).padStart(2,'0');
   const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth()+1).padStart(2,'0');
-  const dd = String(today.getDate()).padStart(2,'0');
-  $('start').value = `${yyyy}-${mm}-${dd}`;
-  $('end').value = `${yyyy}-${mm}-${dd}`;
+  const thisYear = today.getFullYear();
+  const opt = (value, text) => { const o = document.createElement('option'); o.value = value; o.textContent = text; return o; };
+  const part = (box, p) => box.querySelector(`[data-part="${p}"]`);
+  const readDate = box => {
+    const d = +part(box,'d').value, m = +part(box,'m').value, y = +part(box,'y').value;
+    const dt = new Date(y, m-1, d);
+    return dt.getMonth() === m-1 ? dt : null; // null for 31-Feb etc.
+  };
+  const setDate = (box, dt) => {
+    part(box,'d').value = dt.getDate();
+    part(box,'m').value = dt.getMonth()+1;
+    part(box,'y').value = dt.getFullYear();
+    showDate(box);
+  };
+  const showDate = box => {
+    const dt = readDate(box), out = box.querySelector('[data-show]');
+    out.className = dt ? '' : 'bad';
+    out.textContent = dt ? `${DAYS[dt.getDay()]}, ${pad(dt.getDate())}-${MONTHS[dt.getMonth()]}-${dt.getFullYear()}` : 'This date does not exist';
+  };
+  for (const box of [$('start'), $('end')]) {
+    for (let d = 1; d <= 31; d++) part(box,'d').append(opt(d, pad(d)));
+    MONTHS.forEach((name, i) => part(box,'m').append(opt(i+1, `${pad(i+1)} · ${name}`)));
+    for (let y = thisYear + 5; y >= 1990; y--) part(box,'y').append(opt(y, y));
+    box.addEventListener('change', () => showDate(box));
+    box.querySelector('[data-today]').addEventListener('click', () => setDate(box, new Date()));
+    setDate(box, today);
+  }
   const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(n);
 
   $('loanForm').addEventListener('submit', e => {
@@ -124,8 +166,9 @@
     const rate = Number($('rate').value);
     const discountVal = $('discount').value === '' ? 0 : Number($('discount').value);
     const discountType = $('discountType').value;
-    const start = new Date($('start').value + 'T00:00:00');
-    const end = new Date($('end').value + 'T00:00:00');
+    const start = readDate($('start'));
+    const end = readDate($('end'));
+    if (!start || !end) { showError('One of the dates does not exist (for example 31 Feb). Please fix it.'); return; }
     if (!Number.isFinite(principal) || principal < 0 || !Number.isFinite(rate) || rate < 0) {
       showError('Enter valid amounts and interest rate.'); return;
     }
