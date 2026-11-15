@@ -175,6 +175,7 @@
     .unused-check input:checked + span::before { background:var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1.5' fill='none' stroke='%23F2D27E' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center; }
     .hero .roundinfo { font-size:15px; color:var(--on-dark-2); margin:-2px 0 6px; }
     .hero .roundinfo:empty { display:none; }
+    .method input:disabled + span { opacity:.45; }
     .method input:focus-visible + span { outline:3px solid var(--gold); outline-offset:1px; }
     .sheet-actions { display:grid; grid-template-columns:1fr 1.4fr; gap:10px; margin-top:16px; }
 
@@ -296,7 +297,7 @@
     </div>
     <div class="sheet-lbl" style="margin-top:14px" data-t="method">Calculation</div>
     <div class="methods" role="radiogroup">
-      <label class="method"><input type="radio" name="cfgMethod" value="daily"><span><b data-t="mDaily">Exact days</b><small data-t="mDailySub"></small></span></label>
+      <label class="method"><input type="radio" name="cfgMethod" value="daily" disabled><span><b data-t="mDaily">Exact days</b><small data-t="mDailySub"></small></span></label>
       <label class="method"><input type="radio" name="cfgMethod" value="m30"><span><b data-t="m30">30-day months</b><small data-t="m30Sub"></small></span></label>
     </div>
     <div class="sheet-lbl" style="margin-top:16px" data-t="roundoff">Round-off</div>
@@ -443,12 +444,13 @@
 
   // ---------- Interest setup: set once, remembered on this phone ----------
   // method: 'daily' = exact days like banks (yearly rate ÷ 365 per day), 'm30' = total days ÷ 30.
-  const METHODS = ['daily', 'm30'];
-  let cfg = { rate: 1.5, basis: 'monthly', method: 'daily', round: true };  // round: nearest ₹1, like banks
+  // Only 30-day months is in use (1 month = 30 days, 1 year = 360 days). Exact days stays in the code but is switched off.
+  const METHODS = ['m30'];
+  let cfg = { rate: 1.5, basis: 'monthly', method: 'm30', round: true };  // round: nearest ₹1, like banks
   try {
     const saved = JSON.parse(localStorage.getItem('interestCfg') || 'null');
     if (saved && saved.rate >= 0 && (saved.basis === 'monthly' || saved.basis === 'annual')) cfg = { ...cfg, ...saved };
-    if (!METHODS.includes(cfg.method)) cfg.method = 'daily';
+    if (!METHODS.includes(cfg.method)) cfg.method = 'm30';   // old saved 'daily' moves to 30-day
   } catch (e) {}
   const showCfg = () => { $('rateChipText').textContent = `${cfg.rate}% / ${t(cfg.basis === 'annual' ? 'yearShort' : 'monthShort')}`; };
   $('rateChip').addEventListener('click', () => {
