@@ -41,6 +41,14 @@ Details shows: principal, interest, interest per month, period as months + days 
 Money shows no paise when whole (₹57,530), otherwise 2 decimals. Calculation is live; there is no Calculate button.
 Period years/months are calendar-based. The interest method is a setting (see above).
 
+## Money maths: whole paise, no floating point
+Floats caused 1-paisa errors (464.985 → 464.98) and wrong ₹1 round-offs (e.g. "₹1,000.50" rounding down) in about 0.5% of cases. That was found with a 300,000-case test on Sun, 15-Nov-2026.
+- All money goes through `computePaise()` between `// MONEY-ENGINE-START` and `// MONEY-ENGINE-END` in `index.html`.
+- Inputs are read as text and scaled to BigInt (paise; rate × 1e6). Every rounding is half-up, done once, on exact values. No package is needed.
+- Order: interest → subtotal → discount → round-off.
+- `perDay` is display-only, so it stays a float.
+- **Test after any money change:** `python3 -I tests/gen_cases.py /tmp/cases.json && node tests/check_engine.js index.html /tmp/cases.json`. It should print `mismatches: 0 / 60000`. The cases come from exact Python `Fraction` maths.
+
 ## Amount in words
 Shown as the first line of **Details** ("Total in words") and under the Amount box (to catch typos like 5,00,000 vs 50,000). It was under the big total at first, but that crowded the top (Stephin, Sun, 15-Nov-2026). It uses the Indian system: thousand, lakh, crore, plus paise.
 - English is spelled out: "Twelve lakh thirty-four thousand five hundred sixty-seven rupees and fifty paise".

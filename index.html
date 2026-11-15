@@ -524,6 +524,36 @@
   });
 
   // ---------- Live calculation ----------
+  // ---------- Money engine: whole paise (BigInt), no floating-point drift ----------
+  // Typed numbers are read as text and scaled to integers; every rounding is half-up, done once, on exact values.
+  // MONEY-ENGINE-START
+  const toScaled = (text, dec) => {
+    let v = String(text).trim();
+    if (/e/i.test(v)) v = Number(v).toFixed(dec);
+    const [i, f = ''] = v.split('.');
+    return BigInt(i || '0') * 10n ** BigInt(dec) + BigInt((f + '0'.repeat(dec)).slice(0, dec) || '0');
+  };
+  const divRound = (num, den) => (2n * num + den) / (2n * den);   // half-up, num ≥ 0
+  // Returns amounts in paise (BigInt). rate is % per month or per year (basis); method 'daily' or 'm30'.
+  const computePaise = ({ principal, rate, basis, method, days, dtype, discount, roundOn }) => {
+    const P = toScaled(principal, 2), R = toScaled(rate, 6), D = BigInt(days);
+    const toYear = basis === 'annual' ? 1n : 12n;          // monthly rate × 12 = yearly
+    const perMonthDiv = basis === 'annual' ? 12n : 1n;     // yearly rate ÷ 12 = monthly
+    const interest = method === 'daily'
+      ? divRound(P * R * toYear * D, 100n * 365n * 1000000n)               // P × yearly% × days ÷ 36,500
+      : divRound(P * R * D, 100n * 30n * 1000000n * perMonthDiv);          // P × monthly% × days ÷ 3,000
+    const subtotal = P + interest;
+    let after = subtotal;
+    if (discount !== null) {
+      if (dtype === 'final') after = toScaled(discount, 2);
+      else if (dtype === 'percent') after = subtotal - divRound(subtotal * toScaled(discount, 4), 1000000n);
+      else { const d = toScaled(discount, 2); after = subtotal - (d > subtotal ? subtotal : d); }
+    }
+    const total = roundOn && after >= 0n ? divRound(after, 100n) * 100n : after;
+    return { P, interest, subtotal, after, total };
+  };
+  // MONEY-ENGINE-END
+
   const calc = () => {
     const dtype = radio('dtype');
     $('discount').placeholder = L().phDisc[dtype];
@@ -551,20 +581,19 @@
     const basis = cfg.basis;
     const yearly = basis === 'annual' ? rate : rate * 12;     // % a year
     const monthly = basis === 'monthly' ? rate : rate / 12;   // % a month
-    const interest =
-      cfg.method === 'daily' ? principal * yearly / 100 * days / 365 :              // banks: per day, 365-day year
-                               principal * monthly / 100 * days / 30;
-    const perDay = cfg.method === 'daily' ? principal * yearly / 100 / 365 : principal * monthly / 100 / 30;
-    const subtotal = principal + interest;
+    const perDay = cfg.method === 'daily' ? principal * yearly / 100 / 365 : principal * monthly / 100 / 30; // display only
 
     // Discount
     const discOn = !$('discountPanel').hidden && $('discount').value !== '';
     const dv = discOn ? Number($('discount').value) : 0;
     if (discOn && (!(dv >= 0) || (dtype === 'percent' && dv > 100))) return fail(t('errDiscount'));
-    const afterDisc = !discOn ? subtotal
-      : dtype === 'final' ? dv
-      : subtotal - Math.min(subtotal, dtype === 'percent' ? subtotal * dv / 100 : dv);
-    const diff = subtotal - afterDisc;
+
+    // Exact money in paise; shown as rupees below.
+    const roundOn = cfg.round !== false && !(discOn && dtype === 'final');   // round-off is last; skipped for a typed final amount
+    const m = computePaise({ principal: $('principal').value, rate: cfg.rate, basis, method: cfg.method, days, dtype, discount: discOn ? $('discount').value : null, roundOn });
+    const rs = p => Number(p) / 100;
+    const interest = rs(m.interest), subtotal = rs(m.subtotal), afterDisc = rs(m.after);
+    const diff = rs(m.subtotal - m.after);
     const pct = subtotal > 0 ? +(diff / subtotal * 100).toFixed(2) : 0;
     $('dnote').hidden = $('discountPanel').hidden;
     $('dnote').innerHTML = `<div><span>${t('totalNow')}</span><strong>${money(subtotal)}</strong></div>` + (discOn
@@ -573,13 +602,10 @@
       : '');
     if (diff < 0) return fail(t('errFinal')), ($('dnote').hidden = false);
 
-    // Round-off is last; skipped when they typed the final amount themselves.
-    const roundOn = cfg.round !== false && !(discOn && dtype === 'final');
-    const step = 1;
-    const total = roundOn ? Math.round(afterDisc / step) * step : afterDisc;
-    const roundDiff = total - afterDisc;
-    const hasRound = Math.abs(roundDiff) >= 0.005;
-    const hasDisc = diff >= 0.005;
+    const total = rs(m.total);
+    const roundDiff = rs(m.total - m.after);
+    const hasRound = m.total !== m.after;
+    const hasDisc = m.subtotal > m.after;
 
     // Answer panel
     $('total').textContent = money(total);
