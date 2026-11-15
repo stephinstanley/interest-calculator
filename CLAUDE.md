@@ -26,12 +26,25 @@ Tokens are on `:root` in `index.html`; use them, don't hard-code colours.
 - Text contrast passes WCAG AA (4.5:1) everywhere. The icon is a gold ₹ coin on ink (`icons/icon.svg`).
 
 
-Simple interest = Principal × Rate/100 × Period, using the saved setup. Default 1.5% per month (₹1.5 per ₹100 per month). Per month = days/30, per year = days/365. ("Once"/full term was removed: gold loans are monthly or yearly.)
+## Calculation
+Simple interest, using the saved setup (rate, per month/year, **method**). Default: 1.5% per month, **Exact days**.
+Methods (chosen once in Interest setup, saved as `cfg.method`):
+- `daily` **Exact days (like banks, e.g. Federal Bank)**: P × yearly rate × days ÷ 365. A monthly rate is ×12 (1.5%/month = 18%/year). This is the default; the father confirmed banks count each day, not 30-day months.
+- `mdays` **Months + days**: full calendar months × monthly interest + extra days × monthly interest ÷ 30.
+- `m30` **30-day months**: total days ÷ 30 × monthly interest. 12 × 30 = 360, so a real 365-day year counts as 12.17 months, about 1.4% more than daily.
+Example, ₹50,000 at 1.5%/month from 29-Dec-2025 to 15-Nov-2026 (321 days): daily ₹7,915.07 · mdays ₹7,925 · m30 ₹8,025.
+Details shows interest per month and per day. Older saved settings without a method get `daily`.
+("Once"/full term was removed: gold loans are monthly or yearly.)
 Discount panel: ₹ | % | Final amount (what they actually pay; the difference becomes the discount). A box under the input keeps "Total now", "After discount" and the difference (₹ and %) visible while typing.
 Round-off panel: ₹1 | ₹10 | ₹100 (default ₹10), done last. Skipped when Final amount is used.
 Details shows: principal, interest, interest per month, period as months + days (total days), before discount / discount (%), before round-off / round-off.
 Money shows no paise when whole (₹57,530), otherwise 2 decimals. Calculation is live; there is no Calculate button.
-Period years/months are calendar-based (display only); per-month interest still uses days/30. Still waiting on the father: does he count by calendar months?
+Period years/months are calendar-based. The interest method is a setting (see above).
+
+## Amount in words
+Shown under the total (gold, in the answer panel) and under the Amount box (to catch typos like 5,00,000 vs 50,000). It uses the Indian system: thousand, lakh, crore, plus paise.
+- English is spelled out: "Twelve lakh thirty-four thousand five hundred sixty-seven rupees and fifty paise".
+- Tamil and Malayalam use digits plus unit words: "12 ലക്ഷം 34 ആയിരം 567 രൂപ 50 പൈസ".
 
 ## Languages
 English, Tamil, Malayalam (EN | த | മ at the top right; choice saved in localStorage). All text lives in the `I18N` object in `index.html`, and elements use `data-t`. Month names come from `Intl.DateTimeFormat` (en-IN / ta-IN / ml-IN). Translations were written by Claude, so have a native speaker check them. Keep words short; long labels overflow on narrow phones.
