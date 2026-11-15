@@ -57,8 +57,9 @@
         <div>
           <label for="basis">Rate period</label>
           <select id="basis">
-            <option value="annual">Per year</option>
+            <option value="full" selected>Full term</option>
             <option value="monthly">Per month</option>
+            <option value="annual">Per year</option>
           </select>
         </div>
       </div>
@@ -73,6 +74,20 @@
           <input id="end" type="date" required>
         </div>
       </div>
+      <div class="two">
+        <div>
+          <label for="discount">Discount (optional)</label>
+          <input id="discount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 500">
+        </div>
+        <div>
+          <label for="discountType">Discount type</label>
+          <select id="discountType">
+            <option value="amount">Amount (₹)</option>
+            <option value="percent">Percentage (%)</option>
+          </select>
+        </div>
+      </div>
+
       <p id="error" class="error" role="alert" hidden></p>
       <button type="submit">Calculate total</button>
     </form>
@@ -84,7 +99,9 @@
       <div class="line"><span>Principal</span><strong id="principalOut"></strong></div>
       <div class="line"><span>Interest</span><strong id="interestOut"></strong></div>
       <div class="line"><span>Period</span><strong id="daysOut"></strong></div>
-      <p class="hint">Calculated using simple interest, not compound interest. Annual rates use 365 days; monthly rates use 30 days.</p>
+      <div class="line" id="subtotalLine" hidden><span>Total before discount</span><strong id="subtotalOut"></strong></div>
+      <div class="line" id="discountLine" hidden><span id="discountLabel">Discount</span><strong id="discountOut"></strong></div>
+      <p class="hint">Simple interest, not compound. Full term: the rate applies once to the whole loan, whatever the dates. Per year uses 365 days; per month uses 30 days. Discount is taken off the total.</p>
     </div>
   </section>
   <footer>Calculations are estimates. Confirm the rate and dates agreed with the person.</footer>
@@ -105,18 +122,30 @@
     $('error').hidden = true;
     const principal = Number($('principal').value);
     const rate = Number($('rate').value);
+    const discountVal = $('discount').value === '' ? 0 : Number($('discount').value);
+    const discountType = $('discountType').value;
     const start = new Date($('start').value + 'T00:00:00');
     const end = new Date($('end').value + 'T00:00:00');
     if (!Number.isFinite(principal) || principal < 0 || !Number.isFinite(rate) || rate < 0) {
       showError('Enter valid amounts and interest rate.'); return;
     }
+    if (!Number.isFinite(discountVal) || discountVal < 0 || (discountType === 'percent' && discountVal > 100)) {
+      showError('Discount must be a positive amount, or a percentage from 0 to 100.'); return;
+    }
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
       showError('End date must be on or after the starting date.'); return;
     }
     const days = Math.round((end-start)/86400000);
-    const yearFraction = $('basis').value === 'annual' ? days/365 : days/30;
-    const interest = principal * (rate/100) * yearFraction;
-    const total = principal + interest;
+    const basis = $('basis').value;
+    const periods = basis === 'full' ? 1 : basis === 'annual' ? days/365 : days/30;
+    const interest = principal * (rate/100) * periods;
+    const subtotal = principal + interest;
+    const discount = Math.min(subtotal, discountType === 'percent' ? subtotal * discountVal/100 : discountVal);
+    const total = subtotal - discount;
+    $('subtotalLine').hidden = $('discountLine').hidden = discount === 0;
+    $('subtotalOut').textContent = money(subtotal);
+    $('discountLabel').textContent = discountType === 'percent' ? `Discount (${discountVal}%)` : 'Discount';
+    $('discountOut').textContent = '− ' + money(discount);
     $('personResult').textContent = $('person').value.trim() ? `For ${$('person').value.trim()}` : '';
     $('total').textContent = money(total);
     $('principalOut').textContent = money(principal);
