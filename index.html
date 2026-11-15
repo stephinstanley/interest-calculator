@@ -29,7 +29,7 @@
     fieldset.date legend { font-weight:650; margin:0 0 6px; padding:0; }
     .dmy { display:grid; grid-template-columns:1fr 1.4fr 1.3fr; gap:8px; }
     .dmy select { padding:10px 30px 10px 10px; background-position:right 10px center; }
-    .date-note { display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:13px; margin-top:4px; }
+    .date-note { min-height:32px; display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:13px; margin-top:4px; }
     .date-note .bad { color:#a12d2d; font-weight:600; }
     button.link { width:auto; min-height:32px; margin:0; padding:4px 8px; background:none; color:var(--green); font-weight:700; text-decoration:underline; }
     .two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -80,7 +80,7 @@
           <select aria-label="Start month" data-part="m"></select>
           <select aria-label="Start year" data-part="y"></select>
         </div>
-        <div class="date-note"><span data-show></span><button type="button" class="link" data-today>Today</button></div>
+        <div class="date-note"><span data-show></span></div>
       </fieldset>
 
       <fieldset class="date" id="end">
@@ -155,7 +155,7 @@
     MONTHS.forEach((name, i) => part(box,'m').append(opt(i+1, `${pad(i+1)} · ${name}`)));
     for (let y = thisYear + 5; y >= 1990; y--) part(box,'y').append(opt(y, y));
     box.addEventListener('change', () => showDate(box));
-    box.querySelector('[data-today]').addEventListener('click', () => setDate(box, new Date()));
+    box.querySelector('[data-today]')?.addEventListener('click', () => setDate(box, new Date()));
     setDate(box, today);
   }
   const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(n);
