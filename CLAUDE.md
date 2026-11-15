@@ -30,5 +30,11 @@ Day / Month / Year dropdowns, not native `type=date` (Stephin found the native p
 ## Run locally
 `python3 -m http.server 8765`, then open http://localhost:8765 (service workers work on localhost). Test with agent-browser.
 
+## Hosting
+Live at https://stephinstanley.github.io/interest-calculator/ (GitHub Pages, `main` branch, root). Repo: github.com/stephinstanley/interest-calculator (public, Stephin's **personal** GitHub account, not the Heartinz org).
+- Pushing: this Mac's active gh account is normally the work one (`Stephin-Stanley`), which can't push here. Run `gh auth switch -u stephinstanley`, then `git push`, then `gh auth switch -u Stephin-Stanley` to switch back.
+- Commits in this repo use the personal noreply email (set in local git config), so the work email isn't published.
+- Pages rebuilds about a minute after a push. Installed phones pick up the new version on their next online launch.
+
 ## Installing on a phone
-Needs HTTPS hosting (not chosen yet). Android Chrome: menu → Install app. iPhone Safari: Share → Add to Home Screen.
+Android Chrome: open the link → menu (⋮) → Install app / Add to Home screen. iPhone Safari: Share → Add to Home Screen.
