@@ -11,7 +11,8 @@ Plain HTML/CSS/JS installable web app (no build step) for working out simple int
 ## Screen design (redesigned Sun, 15-Nov-2026)
 Mobile first: mobile is the main platform. Everything fits on one phone screen with no scrolling (checked at 360×640, 390×760 and 412 wide, in all three languages). Stephin asked for less scrolling and no person's name.
 Context: this is for a **gold finance** business. The interest rate and type (monthly/yearly) are fixed business settings, so they're never asked for on the main screen.
-- **Answer panel on top** (ink card): big total, a one-line summary (principal + interest, period, any discount/round-off). Errors show here too. The full bill is behind a **"Show details ⌄ / Hide details ⌃" bar at the bottom of the card** (full width, centred). It must not sit top-left, where it looked like a heading.
+- **Answer panel on top** (ink card): big total, a one-line summary (principal + interest, period, any discount/round-off). Errors show here too. A **"View details ›" bar at the bottom of the card** opens the **Details bottom sheet** (`#billSheet`). The sheet scrolls and is grouped like a receipt: the total and words, then **Loan** (principal, dates, period, rate), **Interest** (per day, per month, interest, bank-formula box), and **Settlement** (amount + interest, discount, after discount, round-off, Total to pay). It replaced an in-card expanding list that got too long (Sun, 15-Nov-2026).
+- Sheets focus their title on open, never an input, so the phone keyboard doesn't pop up.
 - **Rate chip** in the answer panel ("1.5% / month ✎") opens the **Interest setup** bottom sheet (`<dialog>`): rate + Per month | Per year, Save/Cancel. It's saved in localStorage (`interestCfg`), defaults to 1.5% per month, and Clear all doesn't reset it.
 - **Input rows** with short left labels: Amount (₹), From, To (+ "Today" link). Nothing else.
 - **+ Discount** opens a small panel (× closes and resets it). Round-off isn't on the main screen; it's a setting.
@@ -36,7 +37,7 @@ A third method, "Months + days" (calendar months + extra days ÷ 30), was added 
 Details shows interest per month and per day, plus a "How it was worked out" line using the bank formula, exact on any calculator: "1,34,000 × 18 × 336 ÷ 36,500 = ₹22,203.62" (daily: P × yearly% × days ÷ 36,500), or "1,34,000 × 1.5 × 336 ÷ 3,000 = ₹22,512" (30-day: P × monthly% × days ÷ 3,000). Per-day is shown with up to 4 decimals (`moneyFine`) so it can be checked on a calculator. Interest is **not** rounded per day, like banks. Stephin chose this on Sun, 15-Nov-2026 after 336 × the rounded ₹66.08 came ₹0.74 short. Older saved settings without a valid method get `daily`; without `round` they get rounding on.
 ("Once"/full term was removed: gold loans are monthly or yearly.)
 Discount panel: ₹ | % | Final amount (what they actually pay; the difference becomes the discount). A box under the input keeps "Total now", "After discount" and the difference (₹ and %) visible while typing.
-Round-off is a **saved setting** in Interest setup (`cfg.round`, default **on**): "Round off to nearest ₹1", like banks (50 paise and up rounds up), done last. When it changes the total, the answer card shows a line under the big total: "Before round-off ₹1,56,335.78 · +₹0.22". It's skipped when the discount type is Final amount. History: it was a ₹1/₹10/₹100 panel, then an on/off chip, then (Sun, 15-Nov-2026) a setting, because the father always rounds.
+Round-off is a **saved setting** in Interest setup (`cfg.round`, default **on**). It has its own "Round-off" heading and an on/off **switch** row, so it doesn't look like a third radio option next to the methods: "Round off to nearest ₹1", like banks (50 paise and up rounds up), done last. When it changes the total, the answer card shows a line under the big total: "Before round-off ₹1,56,335.78 · +₹0.22". It's skipped when the discount type is Final amount. History: it was a ₹1/₹10/₹100 panel, then an on/off chip, then (Sun, 15-Nov-2026) a setting, because the father always rounds.
 Details shows: principal, interest, interest per month, period as months + days (total days), before discount / discount (%), before round-off / round-off.
 Money shows no paise when whole (₹57,530), otherwise 2 decimals. Calculation is live; there is no Calculate button.
 Period years/months are calendar-based. The interest method is a setting (see above).
@@ -50,7 +51,7 @@ Floats caused 1-paisa errors (464.985 → 464.98) and wrong ₹1 round-offs (e.g
 - **Test after any money change:** `python3 -I tests/gen_cases.py /tmp/cases.json && node tests/check_engine.js index.html /tmp/cases.json`. It should print `mismatches: 0 / 60000`. The cases come from exact Python `Fraction` maths.
 
 ## Amount in words
-Shown as the first line of **Details** ("Total in words") and under the Amount box (to catch typos like 5,00,000 vs 50,000). It was under the big total at first, but that crowded the top (Stephin, Sun, 15-Nov-2026). It uses the Indian system: thousand, lakh, crore, plus paise.
+Shown at the top of the **Details** sheet, under the total and under the Amount box (to catch typos like 5,00,000 vs 50,000). It was under the big total at first, but that crowded the top (Stephin, Sun, 15-Nov-2026). It uses the Indian system: thousand, lakh, crore, plus paise.
 - English is spelled out: "Twelve lakh thirty-four thousand five hundred sixty-seven rupees and fifty paise".
 - Tamil and Malayalam use digits plus unit words: "12 ലക്ഷം 34 ആയിരം 567 രൂപ 50 പൈസ".
 
