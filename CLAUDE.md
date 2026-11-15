@@ -30,10 +30,10 @@ Tokens are on `:root` in `index.html`; use them, don't hard-code colours.
 Simple interest, using the saved setup (rate, per month/year, **method**). Default: 1.5% per month, **Exact days**.
 Methods (chosen once in Interest setup, saved as `cfg.method`):
 - `daily` **Exact days (like banks, e.g. Federal Bank)**: P × yearly rate × days ÷ 365. A monthly rate is ×12 (1.5%/month = 18%/year). This is the default; the father confirmed banks count each day, not 30-day months.
-- `mdays` **Months + days**: full calendar months × monthly interest + extra days × monthly interest ÷ 30.
 - `m30` **30-day months**: total days ÷ 30 × monthly interest. 12 × 30 = 360, so a real 365-day year counts as 12.17 months, about 1.4% more than daily.
-Example, ₹50,000 at 1.5%/month from 29-Dec-2025 to 15-Nov-2026 (321 days): daily ₹7,915.07 · mdays ₹7,925 · m30 ₹8,025.
-Details shows interest per month and per day. Older saved settings without a method get `daily`.
+Example, ₹50,000 at 1.5%/month from 29-Dec-2025 to 15-Nov-2026 (321 days): daily ₹7,915.07 · m30 ₹8,025.
+A third method, "Months + days" (calendar months + extra days ÷ 30), was added and then removed on Sun, 15-Nov-2026 because it confused Stephin. Saved settings with `mdays` fall back to `daily`.
+Details shows interest per month and per day. Older saved settings without a valid method get `daily`.
 ("Once"/full term was removed: gold loans are monthly or yearly.)
 Discount panel: ₹ | % | Final amount (what they actually pay; the difference becomes the discount). A box under the input keeps "Total now", "After discount" and the difference (₹ and %) visible while typing.
 Round-off panel: ₹1 | ₹10 | ₹100 (default ₹10), done last. Skipped when Final amount is used.
