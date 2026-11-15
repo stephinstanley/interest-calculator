@@ -94,20 +94,20 @@
       </fieldset>
       <div class="two">
         <div>
-          <label for="discount">Discount (optional)</label>
-          <input id="discount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 500">
-        </div>
-        <div>
           <label for="discountType">Discount type</label>
           <select id="discountType">
             <option value="amount">Amount (₹)</option>
             <option value="percent">Percentage (%)</option>
+            <option value="final">Final amount (₹)</option>
           </select>
+        </div>
+        <div>
+          <label for="discount" id="discountInputLabel">Discount (optional)</label>
+          <input id="discount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 500">
         </div>
       </div>
 
       <p id="error" class="error" role="alert" hidden></p>
-      <button type="submit">Calculate total</button>
     </form>
 
     <div id="result" class="result" hidden aria-live="polite">
@@ -119,7 +119,7 @@
       <div class="line"><span>Period</span><strong id="daysOut"></strong></div>
       <div class="line" id="subtotalLine" hidden><span>Total before discount</span><strong id="subtotalOut"></strong></div>
       <div class="line" id="discountLine" hidden><span id="discountLabel">Discount</span><strong id="discountOut"></strong></div>
-      <p class="hint">Simple interest, not compound. Full term: the rate applies once to the whole loan, whatever the dates. Per year uses 365 days; per month uses 30 days. Discount is taken off the total.</p>
+      <p class="hint">Simple interest, not compound. Full term: the rate applies once to the whole loan, whatever the dates. Per year uses 365 days; per month uses 30 days. Discount is taken off the total. Final amount: type what they will actually pay and the difference becomes the discount.</p>
     </div>
   </section>
   <footer>Calculations are estimates. Confirm the rate and dates agreed with the person.</footer>
@@ -160,10 +160,15 @@
   }
   const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(n);
 
-  $('loanForm').addEventListener('submit', e => {
-    e.preventDefault();
+  // Live calculation: recalculates on every change, no button needed.
+  const PLACEHOLDERS = { amount: ['Discount (optional)', 'e.g. 500'], percent: ['Discount (optional)', 'e.g. 5'], final: ['Final amount they pay', 'e.g. 1900'] };
+  const calc = () => {
+    const [labelText, ph] = PLACEHOLDERS[$('discountType').value];
+    $('discountInputLabel').textContent = labelText;
+    $('discount').placeholder = ph;
     const showError = msg => { $('error').textContent = msg; $('error').hidden = false; $('result').hidden = true; };
     $('error').hidden = true;
+    if ($('principal').value === '' || $('rate').value === '') { $('result').hidden = true; return; }
     const principal = Number($('principal').value);
     const rate = Number($('rate').value);
     const discountVal = $('discount').value === '' ? 0 : Number($('discount').value);
@@ -185,9 +190,14 @@
     const periods = basis === 'full' ? 1 : basis === 'annual' ? days/365 : days/30;
     const interest = principal * (rate/100) * periods;
     const subtotal = principal + interest;
-    const discount = Math.min(subtotal, discountType === 'percent' ? subtotal * discountVal/100 : discountVal);
+    if (discountType === 'final' && $('discount').value !== '' && discountVal > subtotal) {
+      showError(`Final amount is more than the total (${money(subtotal)}).`); return;
+    }
+    const discount = discountType === 'final'
+      ? ($('discount').value === '' ? 0 : subtotal - discountVal)
+      : Math.min(subtotal, discountType === 'percent' ? subtotal * discountVal/100 : discountVal);
     const total = subtotal - discount;
-    $('subtotalLine').hidden = $('discountLine').hidden = discount === 0;
+    $('subtotalLine').hidden = $('discountLine').hidden = discount < 0.005;
     $('subtotalOut').textContent = money(subtotal);
     const discountPct = subtotal > 0 ? discount / subtotal * 100 : 0;
     $('discountLabel').textContent = `Discount (${+discountPct.toFixed(2)}%)`;
@@ -198,7 +208,12 @@
     $('interestOut').textContent = money(interest);
     $('daysOut').textContent = `${days} day${days===1?'':'s'}`;
     $('result').hidden = false;
-  });
+  };
+  $('loanForm').addEventListener('input', calc);
+  $('loanForm').addEventListener('change', calc);
+  $('loanForm').addEventListener('click', e => { if (e.target.matches('[data-today]')) calc(); });
+  $('loanForm').addEventListener('submit', e => { e.preventDefault(); calc(); });
+  calc();
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
   }
