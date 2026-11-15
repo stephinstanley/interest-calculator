@@ -252,8 +252,8 @@
     <section class="panel" id="roundPanel" hidden>
       <div class="panel-head"><b data-t="roundoff">Round-off</b><button type="button" class="x" id="closeRound" aria-label="Remove round-off">×</button></div>
       <div class="seg" role="radiogroup">
-        <label><input type="radio" name="round" value="1"><span>₹1</span></label>
-        <label><input type="radio" name="round" value="10" checked><span>₹10</span></label>
+        <label><input type="radio" name="round" value="1" checked><span>₹1</span></label>
+        <label><input type="radio" name="round" value="10"><span>₹10</span></label>
         <label><input type="radio" name="round" value="100"><span>₹100</span></label>
       </div>
     </section>
@@ -631,7 +631,7 @@
   // ---------- Clear ----------
   $('clearBtn').addEventListener('click', () => {
     $('principal').value = ''; $('discount').value = '';
-    setRadio('dtype', 'amount'); setRadio('round', '10');
+    setRadio('dtype', 'amount'); setRadio('round', '1');
     showPanel('discountPanel', 'addDiscount', false); showPanel('roundPanel', 'addRound', false);
     $('fromInput').value = ''; $('toInput').value = ''; setToMode(true);
     calc();
