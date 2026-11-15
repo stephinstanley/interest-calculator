@@ -12,6 +12,7 @@ Plain HTML/CSS/JS installable web app (no build step) for working out simple int
 Simple interest = Principal × Rate/100 × Period. Defaults: rate 1.5, Per month (the family's usual rate: ₹1.5 per ₹100 per month). Rate periods: Full term (Period = 1, dates don't change it), Per month (days/30), Per year (days/365).
 Optional discount, as ₹ amount, %, or **Final amount** (what they actually pay; the difference from the total becomes the discount), taken off the total (principal + interest). The bill always shows the discount as both % and ₹.
 Calculation is live (on every input/change); there is no Calculate button.
+Period shows calendar months + days, plus total days, e.g. "10 months 17 days (321 days)". This is display only; per-month interest still uses days/30.
 
 ## Dates
 Day / Month / Year dropdowns, not native `type=date` (Stephin found the native picker hard, especially picking the year). Month shows number and name (`12 · Dec`) because their records are written like 29/12/2025. The chosen date shows below as `Mon, 29-Dec-2025`; impossible dates (31 Feb) are flagged. Years 1990 to this year + 5.

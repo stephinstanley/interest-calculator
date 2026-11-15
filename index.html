@@ -158,6 +158,20 @@
     box.querySelector('[data-today]')?.addEventListener('click', () => setDate(box, new Date()));
     setDate(box, today);
   }
+  // Whole calendar months between two dates, then leftover days.
+  // 31-Jan → 28-Feb counts as 1 month (the month end is clamped).
+  const monthsAndDays = (start, end) => {
+    const addMonths = n => {
+      const y = start.getFullYear(), m = start.getMonth() + n;
+      const last = new Date(y, m + 1, 0).getDate();
+      return new Date(y, m, Math.min(start.getDate(), last));
+    };
+    let months = (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth();
+    if (addMonths(months) > end) months--;
+    const days = Math.round((end - addMonths(months)) / 86400000);
+    return { months, days };
+  };
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
   const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(n);
 
   // Live calculation: recalculates on every change, no button needed.
@@ -206,7 +220,9 @@
     $('total').textContent = money(total);
     $('principalOut').textContent = money(principal);
     $('interestOut').textContent = money(interest);
-    $('daysOut').textContent = `${days} day${days===1?'':'s'}`;
+    const md = monthsAndDays(start, end);
+    const mdText = [md.months ? plural(md.months, 'month') : '', md.days || !md.months ? plural(md.days, 'day') : ''].filter(Boolean).join(' ');
+    $('daysOut').textContent = md.months ? `${mdText} (${plural(days, 'day')})` : mdText;
     $('result').hidden = false;
   };
   $('loanForm').addEventListener('input', calc);
