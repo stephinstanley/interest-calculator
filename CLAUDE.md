@@ -8,24 +8,27 @@ Plain HTML/CSS/JS installable web app (no build step) for working out simple int
 - `sw.js` — offline support. Network-first, so fixes reach installed phones on the next online launch. Bump `CACHE` when the `FILES` list changes.
 - `icons/icon.svg` — icon source. PNGs made with `qlmanage -t -s 512` and `sips -z` (no ImageMagick on this Mac).
 
+## Screen design (redesigned Sun, 15-Nov-2026)
+Goal: everything fits on one phone screen with no scrolling (checked at 390×760). Stephin asked for less scrolling and no person's name.
+- **Answer panel on top** (dark green): big total, a one-line summary (principal + interest, period, any discount/round-off). The full bill is behind a "Details" toggle. Errors show here too.
+- **Input rows** with short left labels: Amount (₹), Interest (rate % + Month | Year | Once switch), From, To (+ "Today" link).
+- **Discount** and **Round-off** are "+" buttons that open small panels; × closes and resets them.
+- No name field, subtitle, hint text or footer. The calculation note lives inside Details.
+- `[hidden]` is forced to `display:none !important`, because component `display` rules would otherwise override it.
+
 ## Calculation
-Simple interest = Principal × Rate/100 × Period. Defaults: rate 1.5, Per month (the family's usual rate: ₹1.5 per ₹100 per month). Rate periods: Full term (Period = 1, dates don't change it), Per month (days/30), Per year (days/365).
-Optional discount, as ₹ amount, %, or **Final amount** (what they actually pay; the difference from the total becomes the discount), taken off the total (principal + interest). The bill always shows the discount as both % and ₹.
-Calculation is live (on every input/change); there is no Calculate button.
-A box right under the discount input shows "Total now", "After discount" and the difference (₹ and %), so the original total stays visible while typing.
-Period shows calendar months + days, plus total days, e.g. "10 months 17 days (321 days)". This is display only; per-month interest still uses days/30.
+Simple interest = Principal × Rate/100 × Period. Defaults: 1.5, Month (the family's usual rate: ₹1.5 per ₹100 per month). Month = days/30, Year = days/365, Once = rate charged one time (Period = 1, dates don't change it).
+Discount panel: ₹ | % | Final amount (what they actually pay; the difference becomes the discount). A box under the input keeps "Total now", "After discount" and the difference (₹ and %) visible while typing.
+Round-off panel: ₹1 | ₹10 | ₹100 (default ₹10), done last. Skipped when Final amount is used.
+Details shows: principal, interest, interest per month (hidden for Once), period as months + days (total days), before discount / discount (%), before round-off / round-off.
+Money shows no paise when whole (₹57,530), otherwise 2 decimals. Calculation is live; there is no Calculate button.
+Period months are calendar months (display only); per-month interest still uses days/30. Still waiting on the father: does he count by calendar months?
 
 ## Languages
-English, Tamil, Malayalam (buttons at the top; choice saved in localStorage). All text lives in the `I18N` object in `index.html`; elements use `data-t` (text) and `data-ph` (placeholder). Month and weekday names come from `Intl.DateTimeFormat` (en-IN / ta-IN / ml-IN). Translations were written by Claude: have a native speaker check them.
-
-## Other features
-- Interest per month line (per month: P × r%; per year: P × r% ÷ 12; hidden for Full term).
-- Round-off (none / ₹1 / ₹10 / ₹100), done last, after discount. Skipped when the discount type is Final amount and a value is typed. The bill shows "Before round-off" and the ± round-off only when rounding changed the number.
-- Clear button resets to defaults (1.5, Per month, today's dates).
-- Larger text (18px base, 19px inputs, 56px-tall fields) for easier reading by an older user.
+English, Tamil, Malayalam (EN | த | മ at the top right; choice saved in localStorage). All text lives in the `I18N` object in `index.html`, and elements use `data-t`. Month names come from `Intl.DateTimeFormat` (en-IN / ta-IN / ml-IN). Translations were written by Claude, so have a native speaker check them. Keep words short: the Malayalam "Once" is ഒരിക്കൽ because ഒറ്റത്തവണ overflowed.
 
 ## Dates
-Day / Month / Year dropdowns, not native `type=date` (Stephin found the native picker hard, especially picking the year). Month shows number and name (`12 · Dec`) because their records are written like 29/12/2025. The chosen date shows below as `Mon, 29-Dec-2025`; impossible dates (31 Feb) are flagged. Years 1990 to this year + 5.
+Day / Month / Year dropdowns, not native `type=date` (Stephin found the native picker hard, especially picking the year). Month shows number and name (`12 · Dec`) because their records are written like 29/12/2025. An impossible date (31 Feb) turns the day box red and shows an error. Years 1990 to next year.
 
 ## Run locally
 `python3 -m http.server 8765`, then open http://localhost:8765 (service workers work on localhost). Test with agent-browser.

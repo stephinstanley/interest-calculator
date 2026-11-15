@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#173b32">
   <title>Interest Calculator</title>
   <link rel="manifest" href="manifest.json">
@@ -13,308 +13,388 @@
   <meta name="apple-mobile-web-app-title" content="Interest Calc">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <style>
-    :root { color-scheme: light; --green:#173b32; --bg:#f4f6f2; --card:#fff; --muted:#5d6b63; --line:#d1e0d5; --soft:#e7f0e9; --red:#a12d2d; }
-    * { box-sizing:border-box }
-    body { margin:0; font:18px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Tamil","Noto Sans Malayalam",sans-serif; background:var(--bg); color:#18231d; }
-    main { max-width:560px; margin:0 auto; padding:18px 16px 36px; }
-    header { margin:0 0 18px; }
-    .langs { display:flex; gap:6px; margin-bottom:16px; }
-    .langs button { flex:1; min-height:44px; margin:0; padding:6px 8px; border-radius:22px; background:#fff; color:var(--green); border:1.5px solid #c9d6cd; font-weight:700; font-size:16px; }
-    .langs button[aria-pressed="true"] { background:var(--green); color:#fff; border-color:var(--green); }
-    h1 { font-size:30px; line-height:1.2; margin:0 0 6px; color:var(--green); }
-    .sub { color:var(--muted); margin:0; }
-    .card { background:var(--card); border-radius:18px; padding:20px; box-shadow:0 5px 22px #10251a0c; margin-bottom:16px; }
-    label, fieldset.date legend { display:block; font-weight:700; font-size:17px; margin:18px 0 7px; }
-    form > label:first-child { margin-top:0; }
-    input, select { width:100%; min-height:56px; border:1.5px solid #c9d6cd; border-radius:12px; padding:10px 14px; font:inherit; font-size:19px; background:#fff; color:#18231d; }
-    input:focus, select:focus { outline:3px solid #9cc2ac; outline-offset:1px; border-color:var(--green); }
-    select { appearance:none; -webkit-appearance:none; padding-right:38px;
-      background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1.5 1.5l5.5 5.5 5.5-5.5' fill='none' stroke='%23173b32' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center; }
-    fieldset.date { border:0; padding:0; margin:18px 0 0; min-width:0; }
-    fieldset.date legend { padding:0; margin-top:0; }
-    .dmy { display:grid; grid-template-columns:1fr 1.45fr 1.3fr; gap:8px; }
-    .dmy select { padding:10px 30px 10px 12px; background-position:right 11px center; }
-    .date-note { min-height:36px; display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:16px; margin-top:4px; }
-    .date-note .bad { color:var(--red); font-weight:700; }
+    :root { color-scheme: light; --green:#173b32; --green2:#24584a; --bg:#f4f6f2; --card:#fff; --muted:#5d6b63; --line:#d6e2da; --soft:#e7f0e9; --red:#a12d2d; --field:#c9d6cd; }
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    [hidden] { display:none !important; }
+    body { margin:0; font:18px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Tamil","Noto Sans Malayalam",sans-serif; background:var(--bg); color:#18231d; }
+    main { max-width:520px; margin:0 auto; padding:max(12px, env(safe-area-inset-top)) 16px 28px; }
     button { font:inherit; cursor:pointer; }
-    button.link { min-height:40px; margin:0; padding:4px 10px; border:0; background:none; color:var(--green); font-weight:700; text-decoration:underline; }
-    .two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .two > div > label { margin-top:18px; }
-    .clear { width:100%; min-height:54px; margin-top:20px; border:2px solid var(--green); border-radius:12px; background:#fff; color:var(--green); font-weight:800; font-size:18px; }
-    .result { background:var(--soft); border-radius:14px; padding:18px; margin-top:20px; }
-    .result .big { font-size:38px; line-height:1.15; font-weight:800; color:var(--green); margin:4px 0 12px; overflow-wrap:anywhere; }
-    .line { display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding:9px 0; border-top:1px solid var(--line); }
-    .line span:first-child { color:#4b5a51; }
-    .line strong { text-align:right; }
-    .person { font-weight:700; color:var(--green); margin-bottom:4px; }
-    .hint { color:var(--muted); font-size:15px; margin:12px 0 0; }
-    .discount-note { background:var(--soft); border-radius:12px; padding:12px 14px; margin-top:12px; }
-    .discount-note div { display:flex; justify-content:space-between; gap:12px; }
-    .discount-note .diff { font-weight:800; color:var(--green); border-top:1px solid var(--line); margin-top:6px; padding-top:6px; }
-    .error { color:var(--red); background:#fbeaea; border-radius:10px; padding:12px 14px; margin:16px 0 0; font-weight:700; }
-    footer { text-align:center; color:var(--muted); font-size:14px; padding:8px 8px 0; }
-    @media(max-width:400px){ .two{grid-template-columns:1fr; gap:0} .card{padding:16px} .result .big{font-size:34px} }
+
+    /* Top bar */
+    .top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+    h1 { font-size:20px; margin:0; color:var(--green); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .langs { display:flex; background:#fff; border:1.5px solid var(--field); border-radius:20px; padding:2px; flex:none; }
+    .langs button { border:0; background:none; color:var(--green); font-weight:700; font-size:15px; min-width:38px; min-height:34px; padding:0 8px; border-radius:16px; }
+    .langs button[aria-pressed="true"] { background:var(--green); color:#fff; }
+
+    /* Answer panel */
+    .hero { background:var(--green); color:#fff; border-radius:20px; padding:16px 18px 10px; margin-bottom:14px; }
+    .hero .cap { font-size:15px; opacity:.8; }
+    .hero .total { font-size:40px; line-height:1.1; font-weight:800; margin:2px 0 6px; overflow-wrap:anywhere; letter-spacing:-.5px; }
+    .hero .total.empty { opacity:.45; }
+    .hero .sum { font-size:16px; opacity:.92; }
+    .hero .sum div + div { margin-top:2px; }
+    .hero .err { background:#fff; color:var(--red); border-radius:10px; padding:8px 10px; font-weight:700; font-size:16px; margin:6px 0 4px; }
+    .details-btn { display:flex; align-items:center; gap:6px; margin:8px 0 0 -6px; padding:6px; min-height:36px; border:0; background:none; color:#fff; font-weight:700; font-size:15px; opacity:.9; }
+    .details-btn svg { transition:transform .2s; }
+    .details-btn[aria-expanded="true"] svg { transform:rotate(180deg); }
+    .bill { margin:4px 0 6px; font-size:16px; }
+    .bill .line { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-top:1px solid #ffffff2b; }
+    .bill .line strong { text-align:right; }
+    .bill .note { font-size:14px; opacity:.78; margin:8px 0 2px; }
+
+    /* Input rows */
+    .rows { background:var(--card); border-radius:20px; padding:6px 14px; box-shadow:0 4px 18px #10251a0d; }
+    .row { display:grid; grid-template-columns:64px 1fr; align-items:center; gap:10px; padding:9px 0; }
+    .row + .row { border-top:1px solid #edf2ee; }
+    .row > .lbl { font-weight:700; font-size:16px; color:#3b4a41; line-height:1.2; }
+    .row > .lbl .link { display:block; margin:4px 0 0 -4px; }
+    input, select { width:100%; min-height:52px; border:1.5px solid var(--field); border-radius:12px; padding:8px 12px; font:inherit; font-size:19px; background:#fff; color:#18231d; }
+    input:focus, select:focus { outline:3px solid #9cc2ac; outline-offset:1px; border-color:var(--green); }
+    input::placeholder { color:#9aa69f; }
+    select { appearance:none; -webkit-appearance:none; padding-right:30px;
+      background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.2 1.2l4.8 4.8 4.8-4.8' fill='none' stroke='%23173b32' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center; }
+    .affix { position:relative; }
+    .affix span { position:absolute; top:50%; transform:translateY(-50%); color:var(--muted); font-weight:700; pointer-events:none; }
+    .affix.pre span { left:13px; } .affix.pre input { padding-left:32px; }
+    .affix.suf span { right:12px; } .affix.suf input { padding-right:30px; }
+    .rate { display:grid; gap:8px; }
+    .dmy { display:grid; grid-template-columns:54px 1fr 74px; gap:6px; }
+    .dmy select { padding:8px 20px 8px 8px; background-position:right 6px center; font-size:17px; }
+    .dmy select.bad { border-color:var(--red); color:var(--red); }
+
+    /* Segmented switch */
+    .seg { display:flex; background:#eef3ef; border-radius:12px; padding:3px; gap:3px; min-height:48px; }
+    .seg label { flex:1; min-width:0; position:relative; display:flex; }
+    .seg input { position:absolute; opacity:0; width:1px; height:1px; min-height:0; }
+    .seg span { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; border-radius:9px; font-weight:700; font-size:15px; line-height:1.15; color:var(--green2); padding:2px 4px; }
+    .seg input:checked + span { background:#fff; color:var(--green); box-shadow:0 1px 4px #0b2a1c26; }
+    .seg input:focus-visible + span { outline:3px solid #9cc2ac; }
+
+    button.link { border:0; background:none; color:var(--green); font-weight:700; font-size:15px; text-decoration:underline; padding:4px; min-height:32px; }
+
+    /* Extras: discount and round-off */
+    .extras { display:flex; gap:8px; margin:12px 0 0; }
+    .chip { flex:1; min-height:48px; border:1.5px dashed #9fb5a8; border-radius:14px; background:none; color:var(--green); font-weight:700; font-size:16px; padding:6px 10px; }
+    .panel { background:var(--card); border-radius:20px; padding:12px 14px 14px; margin-top:12px; box-shadow:0 4px 18px #10251a0d; }
+    .panel-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .panel-head b { font-size:16px; color:#3b4a41; }
+    .x { border:0; background:#eef3ef; color:var(--green); border-radius:50%; width:34px; height:34px; font-size:20px; line-height:1; }
+    .panel .seg { margin-bottom:8px; }
+    .dnote { background:var(--soft); border-radius:12px; padding:9px 12px; margin-top:8px; font-size:16px; }
+    .dnote div { display:flex; justify-content:space-between; gap:10px; }
+    .dnote .diff { font-weight:800; color:var(--green); border-top:1px solid var(--line); margin-top:5px; padding-top:5px; }
+    .dnote .over { color:var(--red); }
+
+    .clear { display:block; margin:14px auto 0; }
+    @media (max-width:350px) { .row { grid-template-columns:1fr; gap:6px; } .hero .total { font-size:34px; } }
   </style>
 </head>
 <body>
 <main>
-  <header>
-    <div class="langs" role="group" aria-label="Language">
-      <button type="button" data-lang="en" lang="en">English</button>
-      <button type="button" data-lang="ta" lang="ta">தமிழ்</button>
-      <button type="button" data-lang="ml" lang="ml">മലയാളം</button>
-    </div>
+  <div class="top">
     <h1 data-t="title">Interest Calculator</h1>
-    <p class="sub" data-t="sub">Work out how much someone owes you.</p>
-  </header>
-  <section class="card">
-    <form id="loanForm" autocomplete="off">
-      <label for="person" data-t="person">Person's name (optional)</label>
-      <input id="person" type="text" data-ph="phName">
+    <div class="langs" role="group" aria-label="Language">
+      <button type="button" data-lang="en" lang="en" aria-label="English">EN</button>
+      <button type="button" data-lang="ta" lang="ta" aria-label="தமிழ்">த</button>
+      <button type="button" data-lang="ml" lang="ml" aria-label="മലയാളം">മ</button>
+    </div>
+  </div>
 
-      <label for="principal" data-t="principal">Principal amount (₹)</label>
-      <input id="principal" type="number" inputmode="decimal" min="0" step="0.01" data-ph="phPrincipal">
+  <!-- The answer, always on top -->
+  <section class="hero" aria-live="polite">
+    <div class="cap" data-t="totalToPay">Total to pay</div>
+    <div id="total" class="total empty">₹0</div>
+    <div id="err" class="err" role="alert" hidden></div>
+    <div id="sum" class="sum"></div>
+    <button type="button" class="details-btn" id="detailsBtn" aria-expanded="false" aria-controls="bill" hidden>
+      <span data-t="details">Details</span>
+      <svg width="12" height="8" viewBox="0 0 12 8" aria-hidden="true"><path d="M1.2 1.2l4.8 4.8 4.8-4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div id="bill" class="bill" hidden></div>
+  </section>
 
-      <div class="two">
-        <div>
-          <label for="rate" data-t="rate">Interest rate (%)</label>
-          <input id="rate" type="number" inputmode="decimal" min="0" step="0.01" value="1.5" data-ph="phRate">
-        </div>
-        <div>
-          <label for="basis" data-t="basis">Rate period</label>
-          <select id="basis">
-            <option value="full" data-t="full">Full term</option>
-            <option value="monthly" data-t="monthly" selected>Per month</option>
-            <option value="annual" data-t="annual">Per year</option>
-          </select>
+  <form id="loanForm" autocomplete="off" onsubmit="return false">
+    <div class="rows">
+      <div class="row">
+        <label class="lbl" for="principal" data-t="amount">Amount</label>
+        <div class="affix pre"><span>₹</span><input id="principal" type="number" inputmode="decimal" min="0" step="0.01" placeholder="50000"></div>
+      </div>
+
+      <div class="row">
+        <label class="lbl" for="rate" data-t="rate">Interest</label>
+        <div class="rate">
+          <div class="affix suf"><input id="rate" type="number" inputmode="decimal" min="0" step="0.01" value="1.5"><span>%</span></div>
+          <div class="seg" role="radiogroup" aria-label="Rate period">
+            <label><input type="radio" name="basis" value="monthly" checked><span data-t="monthly">Month</span></label>
+            <label><input type="radio" name="basis" value="annual"><span data-t="annual">Year</span></label>
+            <label><input type="radio" name="basis" value="full"><span data-t="full">Once</span></label>
+          </div>
         </div>
       </div>
 
-      <fieldset class="date" id="start">
-        <legend data-t="start">Starting date</legend>
+      <div class="row" id="start">
+        <div class="lbl" data-t="from">From</div>
         <div class="dmy">
-          <select data-part="d"></select>
-          <select data-part="m"></select>
-          <select data-part="y"></select>
-        </div>
-        <div class="date-note"><span data-show></span></div>
-      </fieldset>
-
-      <fieldset class="date" id="end">
-        <legend data-t="end">End date</legend>
-        <div class="dmy">
-          <select data-part="d"></select>
-          <select data-part="m"></select>
-          <select data-part="y"></select>
-        </div>
-        <div class="date-note"><span data-show></span><button type="button" class="link" data-today data-t="today">Today</button></div>
-      </fieldset>
-
-      <div class="two">
-        <div>
-          <label for="discountType" data-t="discountType">Discount type</label>
-          <select id="discountType">
-            <option value="amount" data-t="dAmount">Amount (₹)</option>
-            <option value="percent" data-t="dPercent">Percentage (%)</option>
-            <option value="final" data-t="dFinal">Final amount (₹)</option>
-          </select>
-        </div>
-        <div>
-          <label for="discount" id="discountInputLabel">Discount (optional)</label>
-          <input id="discount" type="number" inputmode="decimal" min="0" step="0.01">
+          <select data-part="d"></select><select data-part="m"></select><select data-part="y"></select>
         </div>
       </div>
 
-      <div id="discountNote" class="discount-note" hidden aria-live="polite"></div>
-
-      <label for="roundTo" data-t="roundoff">Round-off</label>
-      <select id="roundTo">
-        <option value="0" data-t="roundNone">No round-off</option>
-        <option value="1" data-t="round1">Nearest ₹1</option>
-        <option value="10" data-t="round10">Nearest ₹10</option>
-        <option value="100" data-t="round100">Nearest ₹100</option>
-      </select>
-
-      <p id="error" class="error" role="alert" hidden></p>
-    </form>
-
-    <div id="result" class="result" hidden aria-live="polite">
-      <div id="personResult" class="person"></div>
-      <div class="sub" data-t="totalToPay">Total amount to be paid</div>
-      <div id="total" class="big">₹0.00</div>
-      <div class="line"><span data-t="principalOut">Principal</span><strong id="principalOut"></strong></div>
-      <div class="line"><span data-t="interest">Interest</span><strong id="interestOut"></strong></div>
-      <div class="line" id="perMonthLine"><span data-t="perMonth">Interest per month</span><strong id="perMonthOut"></strong></div>
-      <div class="line"><span data-t="period">Period</span><strong id="daysOut"></strong></div>
-      <div class="line" id="subtotalLine" hidden><span data-t="beforeDiscount">Total before discount</span><strong id="subtotalOut"></strong></div>
-      <div class="line" id="discountLine" hidden><span id="discountLabel">Discount</span><strong id="discountOut"></strong></div>
-      <div class="line" id="beforeRoundLine" hidden><span data-t="beforeRound">Before round-off</span><strong id="beforeRoundOut"></strong></div>
-      <div class="line" id="roundLine" hidden><span data-t="roundLine">Round-off</span><strong id="roundOut"></strong></div>
-      <p class="hint" data-t="hint"></p>
+      <div class="row" id="end">
+        <div class="lbl"><span data-t="to">To</span><button type="button" class="link" data-today data-t="today">Today</button></div>
+        <div class="dmy">
+          <select data-part="d"></select><select data-part="m"></select><select data-part="y"></select>
+        </div>
+      </div>
     </div>
 
-    <button type="button" class="clear" id="clearBtn" data-t="clear">Clear</button>
-  </section>
-  <footer data-t="footer">Calculations are estimates. Confirm the rate and dates agreed with the person.</footer>
+    <div class="extras">
+      <button type="button" class="chip" id="addDiscount" data-t="addDiscount">+ Discount</button>
+      <button type="button" class="chip" id="addRound" data-t="addRound">+ Round-off</button>
+    </div>
+
+    <section class="panel" id="discountPanel" hidden>
+      <div class="panel-head"><b data-t="discount">Discount</b><button type="button" class="x" id="closeDiscount" aria-label="Remove discount">×</button></div>
+      <div class="seg" role="radiogroup">
+        <label><input type="radio" name="dtype" value="amount" checked><span>₹</span></label>
+        <label><input type="radio" name="dtype" value="percent"><span>%</span></label>
+        <label><input type="radio" name="dtype" value="final"><span data-t="dFinal">Final amount</span></label>
+      </div>
+      <input id="discount" type="number" inputmode="decimal" min="0" step="0.01">
+      <div id="dnote" class="dnote" hidden></div>
+    </section>
+
+    <section class="panel" id="roundPanel" hidden>
+      <div class="panel-head"><b data-t="roundoff">Round-off</b><button type="button" class="x" id="closeRound" aria-label="Remove round-off">×</button></div>
+      <div class="seg" role="radiogroup">
+        <label><input type="radio" name="round" value="1"><span>₹1</span></label>
+        <label><input type="radio" name="round" value="10" checked><span>₹10</span></label>
+        <label><input type="radio" name="round" value="100"><span>₹100</span></label>
+      </div>
+    </section>
+
+    <button type="button" class="link clear" id="clearBtn" data-t="clear">Clear all</button>
+  </form>
 </main>
 <script>
   const $ = id => document.getElementById(id);
+  const form = $('loanForm');
+  const radio = name => form.querySelector(`input[name="${name}"]:checked`).value;
+  const setRadio = (name, v) => { form.querySelector(`input[name="${name}"][value="${v}"]`).checked = true; };
 
   // ---------- Text in three languages ----------
   const I18N = {
     en: {
-      title: 'Interest Calculator',
-      sub: 'Work out how much someone owes you.',
-      person: "Person's name (optional)", phName: 'e.g. Arun',
-      principal: 'Principal amount (₹)', phPrincipal: 'e.g. 50000',
-      rate: 'Interest rate (%)', phRate: 'e.g. 1.5',
-      basis: 'Rate period', full: 'Full term', monthly: 'Per month', annual: 'Per year',
-      start: 'Starting date', end: 'End date', today: 'Today',
-      day: 'Day', month: 'Month', year: 'Year',
-      badDate: 'This date does not exist',
-      discountType: 'Discount type', dAmount: 'Amount (₹)', dPercent: 'Percentage (%)', dFinal: 'Final amount (₹)',
-      discountLabel: 'Discount (optional)', finalLabel: 'Final amount they pay',
-      phDiscAmount: 'e.g. 500', phDiscPercent: 'e.g. 5', phDiscFinal: 'e.g. 1900',
+      title: 'Interest Calculator', totalToPay: 'Total to pay', details: 'Details', hideDetails: 'Hide details',
+      amount: 'Amount', rate: 'Interest', monthly: 'Month', annual: 'Year', full: 'Once',
+      from: 'From', to: 'To', today: 'Today', day: 'Day', month: 'Month', year: 'Year',
+      addDiscount: '+ Discount', addRound: '+ Round-off', discount: 'Discount', roundoff: 'Round-off',
+      dFinal: 'Final amount', phDisc: { amount: 'Discount in ₹', percent: 'Discount in %', final: 'Amount they pay' },
       totalNow: 'Total now', afterDiscount: 'After discount', difference: 'Difference', overBy: 'Over the total by',
-      roundoff: 'Round-off', roundNone: 'No round-off', round1: 'Nearest ₹1', round10: 'Nearest ₹10', round100: 'Nearest ₹100',
-      totalToPay: 'Total amount to be paid', name: 'Name: {name}',
-      principalOut: 'Principal', interest: 'Interest', perMonth: 'Interest per month', period: 'Period',
-      beforeDiscount: 'Total before discount', discount: 'Discount', beforeRound: 'Before round-off', roundLine: 'Round-off',
+      clear: 'Clear all', enterAmount: 'Enter the amount',
+      sumLine: '{p} + {i} interest',
+      principal: 'Principal', interest: 'Interest', perMonth: 'Interest per month', period: 'Period',
+      beforeDiscount: 'Total before discount', beforeRound: 'Before round-off',
       months: n => `${n} month${n === 1 ? '' : 's'}`, days: n => `${n} day${n === 1 ? '' : 's'}`,
-      hint: 'Simple interest, not compound. Full term: the rate applies once to the whole loan, whatever the dates. Per year uses 365 days; per month uses 30 days. Discount is taken off the total. Final amount: type what they will actually pay and the difference becomes the discount. Round-off is done last.',
-      clear: 'Clear',
-      footer: 'Calculations are estimates. Confirm the rate and dates agreed with the person.',
-      errAmounts: 'Enter a valid amount and interest rate.',
-      errDate: 'One of the dates does not exist (for example 31 Feb). Please fix it.',
-      errOrder: 'End date must be on or after the starting date.',
-      errDiscount: 'Discount must be a positive amount, or a percentage from 0 to 100.',
-      errFinal: 'Final amount is more than the total ({total}).'
+      note: 'Simple interest. Month = 30 days, Year = 365 days. Once = rate charged one time, whatever the dates.',
+      errAmounts: 'Enter a valid amount and rate.',
+      errDate: 'A date does not exist (e.g. 31 Feb).',
+      errOrder: '"To" date is before "From" date.',
+      errDiscount: 'Discount must be 0 to 100%.',
+      errFinal: 'Final amount is more than the total.'
     },
     ta: {
-      title: 'வட்டி கணக்கீடு',
-      sub: 'ஒருவர் உங்களுக்கு எவ்வளவு தர வேண்டும் என்று கணக்கிடுங்கள்.',
-      person: 'நபரின் பெயர் (விருப்பம்)', phName: 'எ.கா. அருண்',
-      principal: 'அசல் தொகை (₹)', phPrincipal: 'எ.கா. 50000',
-      rate: 'வட்டி விகிதம் (%)', phRate: 'எ.கா. 1.5',
-      basis: 'வட்டி காலம்', full: 'முழு காலத்திற்கு', monthly: 'மாதத்திற்கு', annual: 'ஆண்டுக்கு',
-      start: 'தொடக்க தேதி', end: 'முடிவு தேதி', today: 'இன்று',
-      day: 'நாள்', month: 'மாதம்', year: 'ஆண்டு',
-      badDate: 'இந்த தேதி இல்லை',
-      discountType: 'தள்ளுபடி வகை', dAmount: 'தொகை (₹)', dPercent: 'சதவீதம் (%)', dFinal: 'இறுதித் தொகை (₹)',
-      discountLabel: 'தள்ளுபடி (விருப்பம்)', finalLabel: 'அவர்கள் செலுத்தும் இறுதித் தொகை',
-      phDiscAmount: 'எ.கா. 500', phDiscPercent: 'எ.கா. 5', phDiscFinal: 'எ.கா. 1900',
+      title: 'வட்டி கணக்கீடு', totalToPay: 'செலுத்த வேண்டிய மொத்தம்', details: 'விவரங்கள்', hideDetails: 'விவரங்களை மறை',
+      amount: 'தொகை', rate: 'வட்டி', monthly: 'மாதம்', annual: 'ஆண்டு', full: 'ஒருமுறை',
+      from: 'முதல்', to: 'வரை', today: 'இன்று', day: 'நாள்', month: 'மாதம்', year: 'ஆண்டு',
+      addDiscount: '+ தள்ளுபடி', addRound: '+ ரவுண்ட் ஆஃப்', discount: 'தள்ளுபடி', roundoff: 'ரவுண்ட் ஆஃப்',
+      dFinal: 'இறுதித் தொகை', phDisc: { amount: 'தள்ளுபடி ₹', percent: 'தள்ளுபடி %', final: 'அவர்கள் செலுத்தும் தொகை' },
       totalNow: 'இப்போதைய மொத்தம்', afterDiscount: 'தள்ளுபடிக்குப் பின்', difference: 'வித்தியாசம்', overBy: 'மொத்தத்தை விட அதிகம்',
-      roundoff: 'ரவுண்ட் ஆஃப்', roundNone: 'ரவுண்ட் ஆஃப் வேண்டாம்', round1: 'அருகிலுள்ள ₹1', round10: 'அருகிலுள்ள ₹10', round100: 'அருகிலுள்ள ₹100',
-      totalToPay: 'செலுத்த வேண்டிய மொத்தத் தொகை', name: 'பெயர்: {name}',
-      principalOut: 'அசல்', interest: 'வட்டி', perMonth: 'மாத வட்டி', period: 'காலம்',
-      beforeDiscount: 'தள்ளுபடிக்கு முன் மொத்தம்', discount: 'தள்ளுபடி', beforeRound: 'ரவுண்ட் ஆஃப் முன்', roundLine: 'ரவுண்ட் ஆஃப்',
+      clear: 'அனைத்தையும் அழி', enterAmount: 'தொகையை உள்ளிடுங்கள்',
+      sumLine: '{p} + {i} வட்டி',
+      principal: 'அசல்', interest: 'வட்டி', perMonth: 'மாத வட்டி', period: 'காலம்',
+      beforeDiscount: 'தள்ளுபடிக்கு முன்', beforeRound: 'ரவுண்ட் ஆஃப் முன்',
       months: n => `${n} மாதம்`, days: n => `${n} நாள்`,
-      hint: 'தனி வட்டி (கூட்டு வட்டி அல்ல). முழு காலத்திற்கு: தேதிகளைப் பொருட்படுத்தாமல் வட்டி ஒருமுறை மட்டும். ஆண்டுக்கு = 365 நாள்; மாதத்திற்கு = 30 நாள். தள்ளுபடி மொத்தத்திலிருந்து கழிக்கப்படும். இறுதித் தொகை: அவர்கள் உண்மையில் செலுத்தும் தொகையை உள்ளிடுங்கள்; வித்தியாசம் தள்ளுபடியாகும். ரவுண்ட் ஆஃப் கடைசியில் செய்யப்படும்.',
-      clear: 'அழிக்கவும்',
-      footer: 'இது ஒரு மதிப்பீடு மட்டுமே. ஒப்புக்கொண்ட வட்டி விகிதத்தையும் தேதிகளையும் சரிபார்க்கவும்.',
-      errAmounts: 'சரியான தொகையும் வட்டி விகிதமும் உள்ளிடுங்கள்.',
-      errDate: 'ஒரு தேதி தவறானது (எ.கா. பிப்ரவரி 31). சரிசெய்யவும்.',
-      errOrder: 'முடிவு தேதி தொடக்க தேதிக்குப் பிறகு இருக்க வேண்டும்.',
-      errDiscount: 'தள்ளுபடி சரியான தொகையாக அல்லது 0 முதல் 100 சதவீதமாக இருக்க வேண்டும்.',
-      errFinal: 'இறுதித் தொகை மொத்தத்தை ({total}) விட அதிகம்.'
+      note: 'தனி வட்டி. மாதம் = 30 நாள், ஆண்டு = 365 நாள். ஒருமுறை = தேதிகளைப் பொருட்படுத்தாமல் ஒருமுறை மட்டும் வட்டி.',
+      errAmounts: 'சரியான தொகையும் வட்டியும் உள்ளிடுங்கள்.',
+      errDate: 'ஒரு தேதி தவறானது (எ.கா. பிப்ரவரி 31).',
+      errOrder: '"வரை" தேதி "முதல்" தேதிக்கு முன் உள்ளது.',
+      errDiscount: 'தள்ளுபடி 0 முதல் 100% வரை இருக்க வேண்டும்.',
+      errFinal: 'இறுதித் தொகை மொத்தத்தை விட அதிகம்.'
     },
     ml: {
-      title: 'പലിശ കണക്കുകൂട്ടൽ',
-      sub: 'ഒരാൾ നിങ്ങൾക്ക് എത്ര തരാനുണ്ടെന്ന് കണക്കാക്കുക.',
-      person: 'ആളുടെ പേര് (നിർബന്ധമില്ല)', phName: 'ഉദാ. അരുൺ',
-      principal: 'മുതൽ തുക (₹)', phPrincipal: 'ഉദാ. 50000',
-      rate: 'പലിശ നിരക്ക് (%)', phRate: 'ഉദാ. 1.5',
-      basis: 'പലിശ കാലയളവ്', full: 'മുഴുവൻ കാലയളവിന്', monthly: 'മാസത്തിന്', annual: 'വർഷത്തിന്',
-      start: 'തുടങ്ങിയ തീയതി', end: 'അവസാന തീയതി', today: 'ഇന്ന്',
-      day: 'ദിവസം', month: 'മാസം', year: 'വർഷം',
-      badDate: 'ഈ തീയതി നിലവിലില്ല',
-      discountType: 'ഇളവ് തരം', dAmount: 'തുക (₹)', dPercent: 'ശതമാനം (%)', dFinal: 'അവസാന തുക (₹)',
-      discountLabel: 'ഇളവ് (നിർബന്ധമില്ല)', finalLabel: 'അവർ നൽകുന്ന അവസാന തുക',
-      phDiscAmount: 'ഉദാ. 500', phDiscPercent: 'ഉദാ. 5', phDiscFinal: 'ഉദാ. 1900',
+      title: 'പലിശ കണക്കുകൂട്ടൽ', totalToPay: 'നൽകേണ്ട ആകെ തുക', details: 'വിശദാംശങ്ങൾ', hideDetails: 'വിശദാംശങ്ങൾ മറയ്ക്കുക',
+      amount: 'തുക', rate: 'പലിശ', monthly: 'മാസം', annual: 'വർഷം', full: 'ഒരിക്കൽ',
+      from: 'മുതൽ', to: 'വരെ', today: 'ഇന്ന്', day: 'ദിവസം', month: 'മാസം', year: 'വർഷം',
+      addDiscount: '+ ഇളവ്', addRound: '+ റൗണ്ട് ഓഫ്', discount: 'ഇളവ്', roundoff: 'റൗണ്ട് ഓഫ്',
+      dFinal: 'അവസാന തുക', phDisc: { amount: 'ഇളവ് ₹', percent: 'ഇളവ് %', final: 'അവർ നൽകുന്ന തുക' },
       totalNow: 'ഇപ്പോഴത്തെ ആകെ', afterDiscount: 'ഇളവിന് ശേഷം', difference: 'വ്യത്യാസം', overBy: 'ആകെയേക്കാൾ കൂടുതൽ',
-      roundoff: 'റൗണ്ട് ഓഫ്', roundNone: 'റൗണ്ട് ഓഫ് വേണ്ട', round1: 'അടുത്ത ₹1', round10: 'അടുത്ത ₹10', round100: 'അടുത്ത ₹100',
-      totalToPay: 'നൽകേണ്ട ആകെ തുക', name: 'പേര്: {name}',
-      principalOut: 'മുതൽ', interest: 'പലിശ', perMonth: 'മാസ പലിശ', period: 'കാലയളവ്',
-      beforeDiscount: 'ഇളവിന് മുമ്പുള്ള ആകെ', discount: 'ഇളവ്', beforeRound: 'റൗണ്ട് ഓഫിന് മുമ്പ്', roundLine: 'റൗണ്ട് ഓഫ്',
+      clear: 'എല്ലാം മായ്ക്കുക', enterAmount: 'തുക നൽകുക',
+      sumLine: '{p} + {i} പലിശ',
+      principal: 'മുതൽ', interest: 'പലിശ', perMonth: 'മാസ പലിശ', period: 'കാലയളവ്',
+      beforeDiscount: 'ഇളവിന് മുമ്പ്', beforeRound: 'റൗണ്ട് ഓഫിന് മുമ്പ്',
       months: n => `${n} മാസം`, days: n => `${n} ദിവസം`,
-      hint: 'സാധാരണ പലിശ (കൂട്ടുപലിശ അല്ല). മുഴുവൻ കാലയളവിന്: തീയതി നോക്കാതെ പലിശ ഒരു തവണ മാത്രം. വർഷത്തിന് = 365 ദിവസം; മാസത്തിന് = 30 ദിവസം. ഇളവ് ആകെ തുകയിൽ നിന്ന് കുറയ്ക്കും. അവസാന തുക: അവർ ശരിക്കും നൽകുന്ന തുക നൽകുക; വ്യത്യാസം ഇളവാകും. റൗണ്ട് ഓഫ് അവസാനം ചെയ്യും.',
-      clear: 'മായ്ക്കുക',
-      footer: 'ഇത് ഒരു ഏകദേശ കണക്ക് മാത്രം. സമ്മതിച്ച പലിശ നിരക്കും തീയതികളും ഉറപ്പാക്കുക.',
-      errAmounts: 'ശരിയായ തുകയും പലിശ നിരക്കും നൽകുക.',
-      errDate: 'ഒരു തീയതി തെറ്റാണ് (ഉദാ. ഫെബ്രുവരി 31). ശരിയാക്കുക.',
-      errOrder: 'അവസാന തീയതി തുടങ്ങിയ തീയതിക്ക് ശേഷമായിരിക്കണം.',
-      errDiscount: 'ഇളവ് ശരിയായ തുകയോ 0 മുതൽ 100 വരെ ശതമാനമോ ആയിരിക്കണം.',
-      errFinal: 'അവസാന തുക ആകെയേക്കാൾ ({total}) കൂടുതലാണ്.'
+      note: 'സാധാരണ പലിശ. മാസം = 30 ദിവസം, വർഷം = 365 ദിവസം. ഒരിക്കൽ = തീയതി നോക്കാതെ ഒരു തവണ മാത്രം പലിശ.',
+      errAmounts: 'ശരിയായ തുകയും പലിശയും നൽകുക.',
+      errDate: 'ഒരു തീയതി തെറ്റാണ് (ഉദാ. ഫെബ്രുവരി 31).',
+      errOrder: '"വരെ" തീയതി "മുതൽ" തീയതിക്ക് മുമ്പാണ്.',
+      errDiscount: 'ഇളവ് 0 മുതൽ 100% വരെ ആയിരിക്കണം.',
+      errFinal: 'അവസാന തുക ആകെയേക്കാൾ കൂടുതലാണ്.'
     }
   };
   const LOCALES = { en: 'en-IN', ta: 'ta-IN', ml: 'ml-IN' };
   let lang = 'en';
   try { const saved = localStorage.getItem('lang'); if (I18N[saved]) lang = saved; } catch (e) {}
-  const t = (key, vars = {}) => String(I18N[lang][key] ?? I18N.en[key]).replace(/\{(\w+)\}/g, (_, k) => vars[k]);
+  const L = () => I18N[lang];
+  const t = (key, vars = {}) => String(L()[key] ?? I18N.en[key]).replace(/\{(\w+)\}/g, (_, k) => vars[k]);
 
-  // ---------- Date pickers: day / month / year dropdowns ----------
+  // Money: no paise when it's a whole number (₹57,530), otherwise 2 decimals.
+  const money = n => {
+    const r = Math.round(n * 100) / 100;
+    const whole = Math.abs(r % 1) < 0.005;
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 }).format(r);
+  };
+
+  // ---------- Dates: day / month / year dropdowns ----------
   const pad = n => String(n).padStart(2, '0');
-  const today = new Date();
-  const thisYear = today.getFullYear();
+  const thisYear = new Date().getFullYear();
   const opt = (value, text) => { const o = document.createElement('option'); o.value = value; o.textContent = text; return o; };
   const part = (box, p) => box.querySelector(`[data-part="${p}"]`);
-  const monthName = (i, style = 'short') => new Intl.DateTimeFormat(LOCALES[lang], { month: style }).format(new Date(2000, i, 1));
-  const weekdayName = dt => new Intl.DateTimeFormat(LOCALES[lang], { weekday: 'short' }).format(dt);
+  const monthName = i => new Intl.DateTimeFormat(LOCALES[lang], { month: 'short' }).format(new Date(2000, i, 1)).replace(/\.$/, '');
   const readDate = box => {
     const d = +part(box, 'd').value, m = +part(box, 'm').value, y = +part(box, 'y').value;
     const dt = new Date(y, m - 1, d);
     return dt.getMonth() === m - 1 ? dt : null; // null for 31-Feb etc.
   };
-  const showDate = box => {
-    const dt = readDate(box), out = box.querySelector('[data-show]');
-    out.className = dt ? '' : 'bad';
-    out.textContent = dt ? `${weekdayName(dt)}, ${pad(dt.getDate())}-${monthName(dt.getMonth())}-${dt.getFullYear()}` : t('badDate');
-  };
   const setDate = (box, dt) => {
     part(box, 'd').value = dt.getDate();
     part(box, 'm').value = dt.getMonth() + 1;
     part(box, 'y').value = dt.getFullYear();
-    showDate(box);
   };
   const dateBoxes = [$('start'), $('end')];
   for (const box of dateBoxes) {
     for (let d = 1; d <= 31; d++) part(box, 'd').append(opt(d, pad(d)));
     for (let m = 1; m <= 12; m++) part(box, 'm').append(opt(m, ''));
-    for (let y = thisYear + 5; y >= 1990; y--) part(box, 'y').append(opt(y, y));
-    box.addEventListener('change', () => showDate(box));
-    box.querySelector('[data-today]')?.addEventListener('click', () => setDate(box, new Date()));
-    setDate(box, today);
+    for (let y = thisYear + 1; y >= 1990; y--) part(box, 'y').append(opt(y, y));
+    setDate(box, new Date());
   }
+  $('end').querySelector('[data-today]').addEventListener('click', () => { setDate($('end'), new Date()); calc(); });
 
-  // Whole calendar months between two dates, then leftover days.
-  // 31-Jan → 28-Feb counts as 1 month (the month end is clamped).
+  // Whole calendar months, then leftover days. 31-Jan → 28-Feb = 1 month.
   const monthsAndDays = (start, end) => {
     const addMonths = n => {
       const y = start.getFullYear(), m = start.getMonth() + n;
-      const last = new Date(y, m + 1, 0).getDate();
-      return new Date(y, m, Math.min(start.getDate(), last));
+      return new Date(y, m, Math.min(start.getDate(), new Date(y, m + 1, 0).getDate()));
     };
     let months = (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth();
     if (addMonths(months) > end) months--;
-    const days = Math.round((end - addMonths(months)) / 86400000);
-    return { months, days };
+    return { months, days: Math.round((end - addMonths(months)) / 86400000) };
   };
-  const money = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n);
+  const periodText = (start, end, totalDays, withDays) => {
+    const md = monthsAndDays(start, end);
+    const txt = [md.months ? L().months(md.months) : '', md.days || !md.months ? L().days(md.days) : ''].filter(Boolean).join(' ');
+    return withDays && md.months ? `${txt} (${L().days(totalDays)})` : txt;
+  };
 
-  // ---------- Apply language to the page ----------
-  const DISC_TEXT = { amount: ['discountLabel', 'phDiscAmount'], percent: ['discountLabel', 'phDiscPercent'], final: ['finalLabel', 'phDiscFinal'] };
+  // ---------- Discount / round-off panels ----------
+  const showPanel = (panel, chip, on) => { $(panel).hidden = !on; $(chip).hidden = on; };
+  $('addDiscount').addEventListener('click', () => { showPanel('discountPanel', 'addDiscount', true); $('discount').focus(); calc(); });
+  $('closeDiscount').addEventListener('click', () => { $('discount').value = ''; setRadio('dtype', 'amount'); showPanel('discountPanel', 'addDiscount', false); calc(); });
+  $('addRound').addEventListener('click', () => { showPanel('roundPanel', 'addRound', true); calc(); });
+  $('closeRound').addEventListener('click', () => { showPanel('roundPanel', 'addRound', false); calc(); });
+  $('detailsBtn').addEventListener('click', () => {
+    const open = $('detailsBtn').getAttribute('aria-expanded') !== 'true';
+    $('detailsBtn').setAttribute('aria-expanded', String(open));
+    $('bill').hidden = !open;
+    $('detailsBtn').firstElementChild.textContent = t(open ? 'hideDetails' : 'details');
+  });
+
+  // ---------- Live calculation ----------
+  const calc = () => {
+    const dtype = radio('dtype');
+    $('discount').placeholder = L().phDisc[dtype];
+    for (const box of dateBoxes) part(box, 'd').classList.toggle('bad', !readDate(box));
+
+    const fail = msg => {
+      $('err').textContent = msg; $('err').hidden = false;
+      $('sum').innerHTML = ''; $('detailsBtn').hidden = true; $('bill').hidden = true; $('dnote').hidden = true;
+      $('total').textContent = '₹0'; $('total').classList.add('empty');
+    };
+    $('err').hidden = true;
+    if ($('principal').value === '' || $('rate').value === '') {
+      fail(''); $('err').hidden = true; $('sum').textContent = t('enterAmount'); return;
+    }
+    const principal = Number($('principal').value), rate = Number($('rate').value);
+    const start = readDate($('start')), end = readDate($('end'));
+    if (!start || !end) return fail(t('errDate'));
+    if (!(principal >= 0) || !(rate >= 0)) return fail(t('errAmounts'));
+    if (end < start) return fail(t('errOrder'));
+
+    const days = Math.round((end - start) / 86400000);
+    const basis = radio('basis');
+    const periods = basis === 'full' ? 1 : basis === 'annual' ? days / 365 : days / 30;
+    const interest = principal * (rate / 100) * periods;
+    const subtotal = principal + interest;
+
+    // Discount
+    const discOn = !$('discountPanel').hidden && $('discount').value !== '';
+    const dv = discOn ? Number($('discount').value) : 0;
+    if (discOn && (!(dv >= 0) || (dtype === 'percent' && dv > 100))) return fail(t('errDiscount'));
+    const afterDisc = !discOn ? subtotal
+      : dtype === 'final' ? dv
+      : subtotal - Math.min(subtotal, dtype === 'percent' ? subtotal * dv / 100 : dv);
+    const diff = subtotal - afterDisc;
+    const pct = subtotal > 0 ? +(diff / subtotal * 100).toFixed(2) : 0;
+    $('dnote').hidden = $('discountPanel').hidden;
+    $('dnote').innerHTML = `<div><span>${t('totalNow')}</span><strong>${money(subtotal)}</strong></div>` + (discOn
+      ? `<div><span>${t('afterDiscount')}</span><strong>${money(afterDisc)}</strong></div>
+         <div class="diff${diff < 0 ? ' over' : ''}"><span>${diff < 0 ? t('overBy') : t('difference')}</span><span>${money(Math.abs(diff))}${diff >= 0 ? ` (${pct}%)` : ''}</span></div>`
+      : '');
+    if (diff < 0) return fail(t('errFinal')), ($('dnote').hidden = false);
+
+    // Round-off is last; skipped when they typed the final amount themselves.
+    const roundOn = !$('roundPanel').hidden && !(discOn && dtype === 'final');
+    const step = Number(radio('round'));
+    const total = roundOn ? Math.round(afterDisc / step) * step : afterDisc;
+    const roundDiff = total - afterDisc;
+    const hasRound = Math.abs(roundDiff) >= 0.005;
+    const hasDisc = diff >= 0.005;
+
+    // Answer panel
+    $('total').textContent = money(total);
+    $('total').classList.remove('empty');
+    const extra = [hasDisc ? `−${money(diff)} ${t('discount').toLowerCase()}` : '', hasRound ? `${roundDiff < 0 ? '−' : '+'}${money(Math.abs(roundDiff))} ${t('roundoff').toLowerCase()}` : ''].filter(Boolean).join(' · ');
+    $('sum').innerHTML = `<div>${t('sumLine', { p: money(principal), i: money(interest) })}</div><div>${periodText(start, end, days, false)}${extra ? ' · ' + extra : ''}</div>`;
+    $('detailsBtn').hidden = false;
+    $('bill').hidden = $('detailsBtn').getAttribute('aria-expanded') !== 'true';
+
+    // Full bill (behind "Details")
+    const perMonth = basis === 'monthly' ? principal * rate / 100 : basis === 'annual' ? principal * rate / 1200 : null;
+    const line = (k, v) => `<div class="line"><span>${k}</span><strong>${v}</strong></div>`;
+    $('bill').innerHTML =
+      line(t('principal'), money(principal)) +
+      line(t('interest'), money(interest)) +
+      (perMonth !== null ? line(t('perMonth'), money(perMonth)) : '') +
+      line(t('period'), periodText(start, end, days, true)) +
+      (hasDisc ? line(t('beforeDiscount'), money(subtotal)) + line(`${t('discount')} (${pct}%)`, '−' + money(diff)) : '') +
+      (hasRound ? line(t('beforeRound'), money(afterDisc)) + line(t('roundoff'), (roundDiff < 0 ? '−' : '+') + money(Math.abs(roundDiff))) : '') +
+      `<p class="note">${t('note')}</p>`;
+  };
+  form.addEventListener('input', calc);
+  form.addEventListener('change', calc);
+
+  // ---------- Language ----------
   const applyLang = () => {
     document.documentElement.lang = lang;
     document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
-    document.querySelectorAll('[data-ph]').forEach(el => { el.placeholder = t(el.dataset.ph); });
     document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+    if ($('detailsBtn').getAttribute('aria-expanded') === 'true') $('detailsBtn').firstElementChild.textContent = t('hideDetails');
     for (const box of dateBoxes) {
-      const name = t(box.id === 'start' ? 'start' : 'end');
+      const name = t(box.id === 'start' ? 'from' : 'to');
       part(box, 'd').setAttribute('aria-label', `${name}: ${t('day')}`);
       part(box, 'm').setAttribute('aria-label', `${name}: ${t('month')}`);
       part(box, 'y').setAttribute('aria-label', `${name}: ${t('year')}`);
       [...part(box, 'm').options].forEach((o, i) => { o.textContent = `${pad(i + 1)} · ${monthName(i)}`; });
-      showDate(box);
     }
     calc();
   };
@@ -324,95 +404,14 @@
     applyLang();
   }));
 
-  // ---------- Live calculation ----------
-  const calc = () => {
-    const discountType = $('discountType').value;
-    const [labelKey, phKey] = DISC_TEXT[discountType];
-    $('discountInputLabel').textContent = t(labelKey);
-    $('discount').placeholder = t(phKey);
-
-    const hideAll = () => { $('result').hidden = true; $('discountNote').hidden = true; };
-    const showError = msg => { $('error').textContent = msg; $('error').hidden = false; hideAll(); };
-    $('error').hidden = true;
-    if ($('principal').value === '' || $('rate').value === '') { hideAll(); return; }
-
-    const principal = Number($('principal').value);
-    const rate = Number($('rate').value);
-    const hasDiscount = $('discount').value !== '';
-    const discountVal = hasDiscount ? Number($('discount').value) : 0;
-    const start = readDate($('start'));
-    const end = readDate($('end'));
-    if (!start || !end) return showError(t('errDate'));
-    if (!Number.isFinite(principal) || principal < 0 || !Number.isFinite(rate) || rate < 0) return showError(t('errAmounts'));
-    if (!Number.isFinite(discountVal) || discountVal < 0 || (discountType === 'percent' && discountVal > 100)) return showError(t('errDiscount'));
-    if (end < start) return showError(t('errOrder'));
-
-    const days = Math.round((end - start) / 86400000);
-    const basis = $('basis').value;
-    const periods = basis === 'full' ? 1 : basis === 'annual' ? days / 365 : days / 30;
-    const interest = principal * (rate / 100) * periods;
-    const subtotal = principal + interest;
-
-    // Note under the discount box: the original total stays visible while typing.
-    const afterDisc = !hasDiscount ? subtotal
-      : discountType === 'final' ? discountVal
-      : subtotal - Math.min(subtotal, discountType === 'percent' ? subtotal * discountVal / 100 : discountVal);
-    const diff = subtotal - afterDisc;
-    const pct = subtotal > 0 ? +(diff / subtotal * 100).toFixed(2) : 0;
-    $('discountNote').innerHTML = `<div><span>${t('totalNow')}</span><strong>${money(subtotal)}</strong></div>` + (hasDiscount
-      ? `<div><span>${t('afterDiscount')}</span><strong>${money(afterDisc)}</strong></div>` +
-        `<div class="diff"><span>${diff < 0 ? t('overBy') : t('difference')}</span><span>${money(Math.abs(diff))}${diff >= 0 ? ` (${pct}%)` : ''}</span></div>`
-      : '');
-    $('discountNote').hidden = false;
-    if (discountType === 'final' && hasDiscount && discountVal > subtotal) {
-      $('error').textContent = t('errFinal', { total: money(subtotal) });
-      $('error').hidden = false;
-      $('result').hidden = true;
-      return;
-    }
-
-    // Round-off is done last. Skipped when they typed the final amount themselves.
-    const step = Number($('roundTo').value);
-    const rounded = step && !(discountType === 'final' && hasDiscount) ? Math.round(afterDisc / step) * step : afterDisc;
-    const roundDiff = rounded - afterDisc;
-    const showRound = Math.abs(roundDiff) >= 0.005;
-
-    $('personResult').textContent = $('person').value.trim() ? t('name', { name: $('person').value.trim() }) : '';
-    $('total').textContent = money(rounded);
-    $('principalOut').textContent = money(principal);
-    $('interestOut').textContent = money(interest);
-    const perMonth = basis === 'monthly' ? principal * rate / 100 : basis === 'annual' ? principal * rate / 100 / 12 : null;
-    $('perMonthLine').hidden = perMonth === null;
-    if (perMonth !== null) $('perMonthOut').textContent = money(perMonth);
-    const md = monthsAndDays(start, end);
-    const mdText = [md.months ? I18N[lang].months(md.months) : '', md.days || !md.months ? I18N[lang].days(md.days) : ''].filter(Boolean).join(' ');
-    $('daysOut').textContent = md.months ? `${mdText} (${I18N[lang].days(days)})` : mdText;
-    $('subtotalLine').hidden = $('discountLine').hidden = diff < 0.005;
-    $('subtotalOut').textContent = money(subtotal);
-    $('discountLabel').textContent = `${t('discount')} (${pct}%)`;
-    $('discountOut').textContent = '− ' + money(diff);
-    $('beforeRoundLine').hidden = $('roundLine').hidden = !showRound;
-    $('beforeRoundOut').textContent = money(afterDisc);
-    $('roundOut').textContent = (roundDiff < 0 ? '− ' : '+ ') + money(Math.abs(roundDiff));
-    $('result').hidden = false;
-  };
-  $('loanForm').addEventListener('input', calc);
-  $('loanForm').addEventListener('change', calc);
-  $('loanForm').addEventListener('click', e => { if (e.target.matches('[data-today]')) calc(); });
-  $('loanForm').addEventListener('submit', e => { e.preventDefault(); calc(); });
-
-  // ---------- Clear: back to a fresh calculation ----------
+  // ---------- Clear ----------
   $('clearBtn').addEventListener('click', () => {
-    for (const id of ['person', 'principal', 'discount']) $(id).value = '';
-    $('rate').value = '1.5';
-    $('basis').value = 'monthly';
-    $('discountType').value = 'amount';
-    $('roundTo').value = '0';
-    const now = new Date();
-    dateBoxes.forEach(box => setDate(box, now));
+    $('principal').value = ''; $('discount').value = ''; $('rate').value = '1.5';
+    setRadio('basis', 'monthly'); setRadio('dtype', 'amount'); setRadio('round', '10');
+    showPanel('discountPanel', 'addDiscount', false); showPanel('roundPanel', 'addRound', false);
+    dateBoxes.forEach(box => setDate(box, new Date()));
     calc();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    $('principal').focus({ preventScroll: true });
   });
 
   applyLang();
