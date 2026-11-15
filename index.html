@@ -39,6 +39,9 @@
     .line { display:flex; justify-content:space-between; gap:16px; padding:7px 0; border-top:1px solid #d1e0d5; }
     .line span:first-child { color:#53635a; }
     .hint { color:var(--muted); font-size:13px; margin:10px 0 0; }
+    .discount-note { background:#e7f0e9; border-radius:10px; padding:10px 12px; margin-top:10px; font-size:15px; }
+    .discount-note div { display:flex; justify-content:space-between; gap:12px; }
+    .discount-note .diff { font-weight:700; color:var(--green); border-top:1px solid #d1e0d5; margin-top:6px; padding-top:6px; }
     .error { color:#a12d2d; background:#fbeaea; border-radius:10px; padding:10px 12px; margin:14px 0 0; font-weight:600; }
     footer { text-align:center; color:var(--muted); font-size:12px; padding:8px 8px 0; }
     @media(max-width:390px){ .two{grid-template-columns:1fr} .card{padding:16px} }
@@ -106,6 +109,8 @@
           <input id="discount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 500">
         </div>
       </div>
+
+      <div id="discountNote" class="discount-note" hidden aria-live="polite"></div>
 
       <p id="error" class="error" role="alert" hidden></p>
     </form>
@@ -180,9 +185,9 @@
     const [labelText, ph] = PLACEHOLDERS[$('discountType').value];
     $('discountInputLabel').textContent = labelText;
     $('discount').placeholder = ph;
-    const showError = msg => { $('error').textContent = msg; $('error').hidden = false; $('result').hidden = true; };
+    const showError = msg => { $('error').textContent = msg; $('error').hidden = false; $('result').hidden = true; $('discountNote').hidden = true; };
     $('error').hidden = true;
-    if ($('principal').value === '' || $('rate').value === '') { $('result').hidden = true; return; }
+    if ($('principal').value === '' || $('rate').value === '') { $('result').hidden = true; $('discountNote').hidden = true; return; }
     const principal = Number($('principal').value);
     const rate = Number($('rate').value);
     const discountVal = $('discount').value === '' ? 0 : Number($('discount').value);
@@ -204,8 +209,20 @@
     const periods = basis === 'full' ? 1 : basis === 'annual' ? days/365 : days/30;
     const interest = principal * (rate/100) * periods;
     const subtotal = principal + interest;
+    // Note under the discount box: original total stays visible while typing.
+    const hasDiscount = $('discount').value !== '';
+    const after = !hasDiscount ? subtotal
+      : discountType === 'final' ? discountVal
+      : subtotal - Math.min(subtotal, discountType === 'percent' ? subtotal * discountVal/100 : discountVal);
+    const diff = subtotal - after;
+    const pct = subtotal > 0 ? +(diff / subtotal * 100).toFixed(2) : 0;
+    $('discountNote').hidden = false;
+    $('discountNote').innerHTML = `<div><span>Total now</span><strong>${money(subtotal)}</strong></div>` + (hasDiscount
+      ? `<div><span>After discount</span><strong>${money(after)}</strong></div>` +
+        `<div class="diff"><span>${diff < 0 ? 'Over the total by' : 'Difference'}</span><span>${money(Math.abs(diff))}${diff >= 0 ? ` (${pct}%)` : ''}</span></div>`
+      : '');
     if (discountType === 'final' && $('discount').value !== '' && discountVal > subtotal) {
-      showError(`Final amount is more than the total (${money(subtotal)}).`); return;
+      showError(`Final amount is more than the total (${money(subtotal)}).`); $('discountNote').hidden = false; return;
     }
     const discount = discountType === 'final'
       ? ($('discount').value === '' ? 0 : subtotal - discountVal)
