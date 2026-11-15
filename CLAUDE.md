@@ -14,7 +14,7 @@ Context: this is for a **gold finance** business. The interest rate and type (mo
 - **Answer panel on top** (ink card): big total, a one-line summary (principal + interest, period, any discount/round-off). Errors show here too. The full bill is behind a **"Show details ⌄ / Hide details ⌃" bar at the bottom of the card** (full width, centred). It must not sit top-left, where it looked like a heading.
 - **Rate chip** in the answer panel ("1.5% / month ✎") opens the **Interest setup** bottom sheet (`<dialog>`): rate + Per month | Per year, Save/Cancel. It's saved in localStorage (`interestCfg`), defaults to 1.5% per month, and Clear all doesn't reset it.
 - **Input rows** with short left labels: Amount (₹), From, To (+ "Today" link). Nothing else.
-- **Discount** and **Round-off** are "+" buttons that open small panels; × closes and resets them.
+- **+ Discount** opens a small panel (× closes and resets it). **Round off to ₹1** is a toggle chip.
 - No name field, subtitle, hint text or footer. The calculation note lives inside Details.
 - `[hidden]` is forced to `display:none !important`, because component `display` rules would otherwise override it.
 
@@ -36,7 +36,7 @@ A third method, "Months + days" (calendar months + extra days ÷ 30), was added 
 Details shows interest per month and per day, plus a "How it was worked out" line ("336 days × ₹66.0822 = ₹22,203.62" or "336 ÷ 30 = 11.2 months × ₹2,010 = ₹22,512"). Per-day is shown with up to 4 decimals (`moneyFine`) so it can be checked on a calculator. Interest is **not** rounded per day, like banks. Stephin chose this on Sun, 15-Nov-2026 after 336 × the rounded ₹66.08 came ₹0.74 short. Older saved settings without a valid method get `daily`.
 ("Once"/full term was removed: gold loans are monthly or yearly.)
 Discount panel: ₹ | % | Final amount (what they actually pay; the difference becomes the discount). A box under the input keeps "Total now", "After discount" and the difference (₹ and %) visible while typing.
-Round-off panel: ₹1 | ₹10 | ₹100, default **₹1** (nearest rupee, like banks: 50 paise and up rounds up), done last. Skipped when Final amount is used.
+Round-off is **one on/off button** ("Round off to ₹1", a checkbox-style chip next to + Discount), always to the nearest rupee like banks (50 paise and up rounds up), done last. The ₹10/₹100 options were removed on Sun, 15-Nov-2026: for a small gold finance shop it's only "round or not". It's off by default, and Clear all turns it off. Skipped when Final amount is used.
 Details shows: principal, interest, interest per month, period as months + days (total days), before discount / discount (%), before round-off / round-off.
 Money shows no paise when whole (₹57,530), otherwise 2 decimals. Calculation is live; there is no Calculate button.
 Period years/months are calendar-based. The interest method is a setting (see above).
