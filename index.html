@@ -61,7 +61,10 @@
     .hero .err { background:var(--bad-tint); color:var(--bad); border-radius:var(--r-sm); padding:8px 10px; font-weight:700; font-size:16px; margin:6px 0 4px; }
     .rate-chip { display:flex; align-items:center; gap:6px; border:1px solid #C9972B80; background:#C9972B1F; color:var(--gold-hi); border-radius:18px; min-height:36px; padding:4px 12px; font-weight:700; font-size:15px; flex:none; }
     .rate-chip:active { background:#C9972B40; }
-    .details-btn { display:flex; align-items:center; gap:6px; margin:8px 0 0 -6px; padding:6px; min-height:36px; border:0; background:none; color:var(--on-dark); font-weight:700; font-size:15px; }
+    .details-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:calc(100% + 36px); margin:12px -18px -10px; padding:0 18px; min-height:46px; border:0; border-top:1px solid var(--on-dark-line); border-radius:0 0 var(--r-lg) var(--r-lg); background:#FFFFFF0A; color:var(--gold-hi); font-weight:700; font-size:15px; }
+    .details-btn:active { background:#FFFFFF1A; }
+    .bill .words-line { display:block; padding:10px 0; margin-top:10px; border-top:1px solid var(--on-dark-line); color:var(--gold-hi); font-size:15px; line-height:1.35; }
+    .bill .words-line small { display:block; color:var(--on-dark-2); font-size:13px; }
     .details-btn svg { transition:transform .2s; color:var(--gold); }
     .details-btn[aria-expanded="true"] svg { transform:rotate(180deg); }
     .bill { margin:4px 0 6px; font-size:16px; }
@@ -188,14 +191,13 @@
       </button>
     </div>
     <div id="total" class="total empty">₹0</div>
-    <div id="totalWords" class="words"></div>
     <div id="err" class="err" role="alert" hidden></div>
     <div id="sum" class="sum"></div>
+    <div id="bill" class="bill" hidden></div>
     <button type="button" class="details-btn" id="detailsBtn" aria-expanded="false" aria-controls="bill" hidden>
-      <span data-t="details">Details</span>
+      <span data-t="details">Show details</span>
       <svg width="12" height="8" viewBox="0 0 12 8" aria-hidden="true"><path d="M1.2 1.2l4.8 4.8 4.8-4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <div id="bill" class="bill" hidden></div>
   </section>
 
   <form id="loanForm" autocomplete="off" onsubmit="return false">
@@ -290,7 +292,7 @@
   // ---------- Text in three languages ----------
   const I18N = {
     en: {
-      title: 'Interest Calculator', totalToPay: 'Total to pay', details: 'Details', hideDetails: 'Hide details',
+      title: 'Interest Calculator', totalToPay: 'Total to pay', details: 'Show details', hideDetails: 'Hide details', inWords: 'Total in words',
       amount: 'Amount', rate: 'Interest', monthly: 'Month', annual: 'Year', full: 'Once',
       from: 'From', to: 'To', today: 'Today', useToday: 'Use today', badDate: 'This date does not exist',
       enterFrom: 'Type the From date (e.g. 29/12/2025)', enterTo: 'Type the To date',
@@ -315,7 +317,7 @@
       errFinal: 'Final amount is more than the total.'
     },
     ta: {
-      title: 'வட்டி கணக்கீடு', totalToPay: 'செலுத்த வேண்டிய மொத்தம்', details: 'விவரங்கள்', hideDetails: 'விவரங்களை மறை',
+      title: 'வட்டி கணக்கீடு', totalToPay: 'செலுத்த வேண்டிய மொத்தம்', details: 'விவரங்களைக் காட்டு', hideDetails: 'விவரங்களை மறை', inWords: 'மொத்தம் எழுத்தில்',
       amount: 'தொகை', rate: 'வட்டி', monthly: 'மாதம்', annual: 'ஆண்டு', full: 'ஒருமுறை',
       from: 'முதல்', to: 'வரை', today: 'இன்று', useToday: 'இன்றைய தேதி', badDate: 'இந்த தேதி இல்லை',
       enterFrom: '"முதல்" தேதியை உள்ளிடுங்கள் (எ.கா. 29/12/2025)', enterTo: '"வரை" தேதியை உள்ளிடுங்கள்',
@@ -340,7 +342,7 @@
       errFinal: 'இறுதித் தொகை மொத்தத்தை விட அதிகம்.'
     },
     ml: {
-      title: 'പലിശ കണക്കുകൂട്ടൽ', totalToPay: 'നൽകേണ്ട ആകെ തുക', details: 'വിശദാംശങ്ങൾ', hideDetails: 'വിശദാംശങ്ങൾ മറയ്ക്കുക',
+      title: 'പലിശ കണക്കുകൂട്ടൽ', totalToPay: 'നൽകേണ്ട ആകെ തുക', details: 'വിശദാംശങ്ങൾ കാണുക', hideDetails: 'വിശദാംശങ്ങൾ മറയ്ക്കുക', inWords: 'ആകെ തുക അക്ഷരത്തിൽ',
       amount: 'തുക', rate: 'പലിശ', monthly: 'മാസം', annual: 'വർഷം', full: 'ഒരിക്കൽ',
       from: 'മുതൽ', to: 'വരെ', today: 'ഇന്ന്', useToday: 'ഇന്നത്തെ തീയതി', badDate: 'ഈ തീയതി നിലവിലില്ല',
       enterFrom: '"മുതൽ" തീയതി നൽകുക (ഉദാ. 29/12/2025)', enterTo: '"വരെ" തീയതി നൽകുക',
@@ -532,7 +534,7 @@
     const fail = msg => {
       $('err').textContent = msg; $('err').hidden = false;
       $('sum').innerHTML = ''; $('detailsBtn').hidden = true; $('bill').hidden = true; $('dnote').hidden = true;
-      $('total').textContent = '₹0'; $('total').classList.add('empty'); $('totalWords').textContent = '';
+      $('total').textContent = '₹0'; $('total').classList.add('empty');
     };
     $('err').hidden = true;
     readFrom(); if (!toIsToday) readTo();
@@ -584,7 +586,6 @@
 
     // Answer panel
     $('total').textContent = money(total);
-    $('totalWords').textContent = amountWords(total);
     $('total').classList.remove('empty');
     const extra = [hasDisc ? `<span class="good">−${money(diff)} ${t('discount').toLowerCase()}</span>` : '', hasRound ? `${roundDiff < 0 ? '−' : '+'}${money(Math.abs(roundDiff))} ${t('roundoff').toLowerCase()}` : ''].filter(Boolean).join(' · ');
     $('sum').innerHTML = `<div>${t('sumLine', { p: `<b>${money(principal)}</b>`, i: `<b class="gold">${money(interest)}</b>` })}</div><div>${periodText(start, end, days, false)}${extra ? ' · ' + extra : ''}</div>`;
@@ -595,6 +596,7 @@
     const perMonth = principal * monthly / 100;
     const line = (k, v, cls = '') => `<div class="line ${cls}"><span>${k}</span><strong>${v}</strong></div>`;
     $('bill').innerHTML =
+      `<div class="words-line"><small>${t('inWords')}</small>${amountWords(total)}</div>` +
       line(t('principal'), money(principal)) +
       line(`${t('interest')} (${cfg.rate}% / ${t(basis === 'annual' ? 'yearShort' : 'monthShort')})`, money(interest), 'gold') +
       line(t('perMonth'), money(perMonth)) +

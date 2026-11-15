@@ -11,7 +11,7 @@ Plain HTML/CSS/JS installable web app (no build step) for working out simple int
 ## Screen design (redesigned Sun, 15-Nov-2026)
 Mobile first: mobile is the main platform. Everything fits on one phone screen with no scrolling (checked at 360×640, 390×760 and 412 wide, in all three languages). Stephin asked for less scrolling and no person's name.
 Context: this is for a **gold finance** business. The interest rate and type (monthly/yearly) are fixed business settings, so they're never asked for on the main screen.
-- **Answer panel on top** (dark green): big total, a one-line summary (principal + interest, period, any discount/round-off). The full bill is behind a "Details" toggle. Errors show here too.
+- **Answer panel on top** (ink card): big total, a one-line summary (principal + interest, period, any discount/round-off). Errors show here too. The full bill is behind a **"Show details ⌄ / Hide details ⌃" bar at the bottom of the card** (full width, centred). It must not sit top-left, where it looked like a heading.
 - **Rate chip** in the answer panel ("1.5% / month ✎") opens the **Interest setup** bottom sheet (`<dialog>`): rate + Per month | Per year, Save/Cancel. It's saved in localStorage (`interestCfg`), defaults to 1.5% per month, and Clear all doesn't reset it.
 - **Input rows** with short left labels: Amount (₹), From, To (+ "Today" link). Nothing else.
 - **Discount** and **Round-off** are "+" buttons that open small panels; × closes and resets them.
@@ -42,7 +42,7 @@ Money shows no paise when whole (₹57,530), otherwise 2 decimals. Calculation i
 Period years/months are calendar-based. The interest method is a setting (see above).
 
 ## Amount in words
-Shown under the total (gold, in the answer panel) and under the Amount box (to catch typos like 5,00,000 vs 50,000). It uses the Indian system: thousand, lakh, crore, plus paise.
+Shown as the first line of **Details** ("Total in words") and under the Amount box (to catch typos like 5,00,000 vs 50,000). It was under the big total at first, but that crowded the top (Stephin, Sun, 15-Nov-2026). It uses the Indian system: thousand, lakh, crore, plus paise.
 - English is spelled out: "Twelve lakh thirty-four thousand five hundred sixty-seven rupees and fifty paise".
 - Tamil and Malayalam use digits plus unit words: "12 ലക്ഷം 34 ആയിരം 567 രൂപ 50 പൈസ".
 
