@@ -1,6 +1,6 @@
 // Bump CACHE when the file list changes. Pages use network-first, so code
 // fixes reach installed phones on the next online launch without a bump.
-const CACHE = "interest-calculator-v2";
+const CACHE = "interest-calculator-v3";
 const FILES = [
   "./",
   "./index.html",
@@ -26,8 +26,11 @@ self.addEventListener("fetch", event => {
   if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
 
   // Network first: fresh copy when online, cached copy when offline.
+  // cache: "no-cache" makes the browser check the server every time instead of
+  // reusing its own HTTP cache (servers like python http.server send no
+  // Cache-Control, so the browser would otherwise guess and serve old files).
   event.respondWith(
-    fetch(req)
+    fetch(req.url, { cache: "no-cache", credentials: "same-origin" })
       .then(res => {
         if (res.ok) {
           const copy = res.clone();
