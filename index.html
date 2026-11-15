@@ -189,7 +189,8 @@
     const total = subtotal - discount;
     $('subtotalLine').hidden = $('discountLine').hidden = discount === 0;
     $('subtotalOut').textContent = money(subtotal);
-    $('discountLabel').textContent = discountType === 'percent' ? `Discount (${discountVal}%)` : 'Discount';
+    const discountPct = subtotal > 0 ? discount / subtotal * 100 : 0;
+    $('discountLabel').textContent = `Discount (${+discountPct.toFixed(2)}%)`;
     $('discountOut').textContent = '− ' + money(discount);
     $('personResult').textContent = $('person').value.trim() ? `For ${$('person').value.trim()}` : '';
     $('total').textContent = money(total);
