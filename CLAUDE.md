@@ -68,10 +68,11 @@ Shown at the top of the **Details** sheet, under the total and under the Amount 
 English, Tamil, Malayalam (EN | த | മ at the top right; choice saved in localStorage). All text lives in the `I18N` object in `index.html`, and elements use `data-t`. Month names come from `Intl.DateTimeFormat` (en-IN / ta-IN / ml-IN). Translations were written by Claude, so have a native speaker check them. Keep words short; long labels overflow on narrow phones.
 
 ## Dates
-Typed on the number pad, the way the pledge receipt shows it (`DD/MM/YYYY`). It replaced the native picker and then the day/month/year dropdowns; Stephin found both annoying.
-- Slashes are added automatically (`29122025` → `29/12/2025`), and the caret is kept in place on edits/backspace.
+Typed on the number pad, day first, the way the pledge receipt shows it (`DD/MM/YYYY`). It replaced the native picker and then the day/month/year dropdowns; Stephin found both annoying.
+- **Forgiving typing** (Sun, 15-Nov-2026; the father types `1/1/26`, not `01/01/2026`). `tidyTyped()` turns any `.` `-` `,` or space into `/` and adds a slash by itself after a 2-digit day or month, so `1/1/26`, `1.1.26`, `1-1-26`, `1 1 26`, `010126` and `01012026` all work. Leaving the box tidies it to `01/01/2026`. The keypad is `inputmode="decimal"` so it has a `.` key (the iPhone number pad has no `/`).
+- The date in words under the box is big and bold (`.okdate`): it's the check he reads. Errors say what's wrong: "Month must be 1 to 12", "Feb has only 28 days".
 - **Calendar button** at the right of each date box (added Sun, 15-Nov-2026 at Stephin's request: "we need date picker also"). It's a see-through native `<input type="date">` over a calendar icon, so a tap opens the phone's own picker; it starts on the typed date (or today) and writes the picked date back into the box as DD/MM/YYYY. Typing still works. A custom bottom-sheet calendar was built and removed earlier the same day as "confusing"; don't bring back a custom one.
-- A 2-digit year (`291225`) is accepted only when leaving the box, then expanded to `29/12/2025`, so typing "2025" doesn't flash 2020 at "20".
+- A 2-digit year counts straight away (the iPhone decimal pad has no Done key), except `19` and `20`, which wait until leaving the box so typing "2025" doesn't flash 2020. 2-digit years become 20xx (19xx if that would be more than a year ahead).
 - Under the box: the date in words (`Mon, 29-Dec-2025`), or red "This date does not exist" for 31/02.
 - **To** defaults to a "Today · 15-Nov-2026 ✎" button; tapping it opens the same typed box (prefilled with today) plus a "Use today" link.
 - Until From is complete, the answer panel says "Type the From date".

@@ -113,6 +113,7 @@
     .dpick::-webkit-calendar-picker-indicator { position:absolute; inset:0; width:100%; height:100%; cursor:pointer; }
     .dinput.bad { border-color:var(--bad); background:var(--bad-tint); color:var(--bad); }
     .dhint { display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:26px; margin-top:3px; font-size:15px; color:var(--text-2); }
+    .dhint.okdate, .dhint .okdate { color:var(--ink); font-weight:700; font-size:17px; }
     .dhint.bad, .dhint .bad { color:var(--bad); font-weight:700; }
     .dhint .link { min-height:28px; padding:2px 4px; }
     .today-btn { width:100%; min-height:52px; display:flex; align-items:center; justify-content:space-between; gap:8px; border:1.5px solid var(--field); border-radius:var(--r-md); background:var(--surface-2); padding:8px 14px; font-size:17px; color:var(--ink); text-align:left; }
@@ -250,7 +251,7 @@
       <div class="row">
         <label class="lbl" for="fromInput" data-t="from">From</label>
         <div>
-          <div class="dwrap"><input id="fromInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY"><span class="dcal"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input type="date" class="dpick" tabindex="-1" aria-label="Calendar" data-for="fromInput"></span></div>
+          <div class="dwrap"><input id="fromInput" class="dinput" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY"><span class="dcal"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input type="date" class="dpick" tabindex="-1" aria-label="Calendar" data-for="fromInput"></span></div>
           <div class="dhint" id="fromHint"></div>
         </div>
       </div>
@@ -263,7 +264,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>
           </button>
           <div id="toCustom" hidden>
-            <div class="dwrap"><input id="toInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY"><span class="dcal"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input type="date" class="dpick" tabindex="-1" aria-label="Calendar" data-for="toInput"></span></div>
+            <div class="dwrap"><input id="toInput" class="dinput" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY"><span class="dcal"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input type="date" class="dpick" tabindex="-1" aria-label="Calendar" data-for="toInput"></span></div>
             <div class="dhint"><span id="toHint"></span><button type="button" class="link" id="backToday" data-t="useToday">Use today</button></div>
           </div>
         </div>
@@ -344,7 +345,7 @@
     en: {
       title: 'Interest Calculator', totalToPay: 'Total to pay', details: 'View details', detailsTitle: 'Details', secLoan: 'Loan', secInterest: 'Interest', secSettle: 'Settlement', dates: 'Dates', rateLine: 'Rate', amountPlusInterest: 'Amount + interest',
       amount: 'Amount', rate: 'Interest', monthly: 'Month', annual: 'Year', full: 'Once',
-      from: 'From', to: 'To', today: 'Today', useToday: 'Use today', badDate: 'This date does not exist',
+      from: 'From', to: 'To', today: 'Today', useToday: 'Use today', badDate: 'This date does not exist', errMonth: 'Month must be 1 to 12', errDayIn: '{m} has only {n} days',
       enterFrom: 'Type the From date (e.g. 29/12/2025)', enterTo: 'Type the To date',
       addDiscount: '+ Discount', roundSetting: 'Round off to nearest ₹1', roundSettingSub: 'Like banks: 50 paise or more rounds up.', discount: 'Discount', roundoff: 'Round-off',
       dFinal: 'Final amount', phDisc: { amount: 'Discount in ₹', percent: 'Discount in %', final: 'Amount they pay' },
@@ -375,7 +376,7 @@
     ta: {
       title: 'வட்டி கணக்கீடு', totalToPay: 'செலுத்த வேண்டிய மொத்தம்', details: 'விவரங்களைப் பார்', detailsTitle: 'விவரங்கள்', secLoan: 'கடன்', secInterest: 'வட்டி', secSettle: 'இறுதி கணக்கு', dates: 'தேதிகள்', rateLine: 'வட்டி விகிதம்', amountPlusInterest: 'தொகை + வட்டி',
       amount: 'தொகை', rate: 'வட்டி', monthly: 'மாதம்', annual: 'ஆண்டு', full: 'ஒருமுறை',
-      from: 'முதல்', to: 'வரை', today: 'இன்று', useToday: 'இன்றைய தேதி', badDate: 'இந்த தேதி இல்லை',
+      from: 'முதல்', to: 'வரை', today: 'இன்று', useToday: 'இன்றைய தேதி', badDate: 'இந்த தேதி இல்லை', errMonth: 'மாதம் 1 முதல் 12 வரை', errDayIn: '{m} மாதத்தில் {n} நாட்கள் மட்டுமே',
       enterFrom: '"முதல்" தேதியை உள்ளிடுங்கள் (எ.கா. 29/12/2025)', enterTo: '"வரை" தேதியை உள்ளிடுங்கள்',
       addDiscount: '+ தள்ளுபடி', roundSetting: 'அருகிலுள்ள ₹1-க்கு ரவுண்ட் ஆஃப்', roundSettingSub: 'வங்கிகள் போல: 50 பைசா அல்லது அதற்கு மேல் இருந்தால் மேலே.', discount: 'தள்ளுபடி', roundoff: 'ரவுண்ட் ஆஃப்',
       dFinal: 'இறுதித் தொகை', phDisc: { amount: 'தள்ளுபடி ₹', percent: 'தள்ளுபடி %', final: 'அவர்கள் செலுத்தும் தொகை' },
@@ -406,7 +407,7 @@
     ml: {
       title: 'പലിശ കണക്കുകൂട്ടൽ', totalToPay: 'നൽകേണ്ട ആകെ തുക', details: 'വിശദാംശങ്ങൾ കാണുക', detailsTitle: 'വിശദാംശങ്ങൾ', secLoan: 'വായ്പ', secInterest: 'പലിശ', secSettle: 'അന്തിമ കണക്ക്', dates: 'തീയതികൾ', rateLine: 'പലിശ നിരക്ക്', amountPlusInterest: 'തുക + പലിശ',
       amount: 'തുക', rate: 'പലിശ', monthly: 'മാസം', annual: 'വർഷം', full: 'ഒരിക്കൽ',
-      from: 'മുതൽ', to: 'വരെ', today: 'ഇന്ന്', useToday: 'ഇന്നത്തെ തീയതി', badDate: 'ഈ തീയതി നിലവിലില്ല',
+      from: 'മുതൽ', to: 'വരെ', today: 'ഇന്ന്', useToday: 'ഇന്നത്തെ തീയതി', badDate: 'ഈ തീയതി നിലവിലില്ല', errMonth: 'മാസം 1 മുതൽ 12 വരെ', errDayIn: '{m} മാസത്തിൽ {n} ദിവസം മാത്രം',
       enterFrom: '"മുതൽ" തീയതി നൽകുക (ഉദാ. 29/12/2025)', enterTo: '"വരെ" തീയതി നൽകുക',
       addDiscount: '+ ഇളവ്', roundSetting: 'അടുത്ത ₹1-ലേക്ക് റൗണ്ട് ഓഫ്', roundSettingSub: 'ബാങ്കുകളെ പോലെ: 50 പൈസയോ അതിൽ കൂടുതലോ ആണെങ്കിൽ മുകളിലേക്ക്.', discount: 'ഇളവ്', roundoff: 'റൗണ്ട് ഓഫ്',
       dFinal: 'അവസാന തുക', phDisc: { amount: 'ഇളവ് ₹', percent: 'ഇളവ് %', final: 'അവർ നൽകുന്ന തുക' },
@@ -535,21 +536,46 @@
   const fmtDate = dt => `${weekdayName(dt)}, ${pad(dt.getDate())}-${monthName(dt.getMonth())}-${dt.getFullYear()}`;
   const toTyped = dt => `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}/${dt.getFullYear()}`;
   const todayDate = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
-  const formatDigits = d => d.length <= 2 ? d : d.length <= 4 ? `${d.slice(0, 2)}/${d.slice(2)}` : `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
   // Returns a Date, 'partial' (still typing / empty) or 'bad' (impossible date).
+  // Typed dates are forgiving: 1/1/26, 1.1.26, 1-1-26, 1 1 26, 010126 and 01012026 all mean 01/01/2026.
+  // While typing, any separator becomes '/', and a slash is added by itself after a 2-digit day or month.
+  const tidyTyped = v => {
+    let out = '', seg = 0, len = 0;
+    for (const ch of v.replace(/[.\-, ]/g, '/')) {
+      if (ch === '/') { if (len > 0 && seg < 2) { out += '/'; seg++; len = 0; } continue; }
+      if (!/\d/.test(ch)) continue;
+      if (seg < 2 && len === 2) { out += '/'; seg++; len = 0; }
+      if (seg === 2 && len === 4) continue;
+      out += ch; len++;
+    }
+    return out;
+  };
+  // Returns a Date, 'partial' (still typing / empty) or 'bad' (impossible date).
+  const dateParts = value => {
+    const [ds, ms, ys] = value.split('/');
+    return { ds, ms, ys, day: +ds, mon: +ms, year: ys && ys.length === 2 ? +ys + ((2000 + +ys > new Date().getFullYear() + 1) ? 1900 : 2000) : +ys };
+  };
+  // A 2-digit year counts at once (1/1/26 works without leaving the box), except "19"/"20", which may be the start of 1999/2026.
+  const yearDone = (ys, allowShortYear) => ys !== undefined && (ys.length === 4 || (ys.length === 2 && (allowShortYear || !/^(19|20)$/.test(ys))));
   const parseTyped = (value, allowShortYear) => {
-    const d = value.replace(/\D/g, '');
-    if (d.length !== 8 && !(d.length === 6 && allowShortYear)) return 'partial';
-    const day = +d.slice(0, 2), mon = +d.slice(2, 4);
-    let year = +d.slice(4);
-    if (d.length === 6) year += (2000 + year > new Date().getFullYear() + 1) ? 1900 : 2000;
+    const { ds, ms, ys, day, mon, year } = dateParts(value);
+    if (!ds || !ms || !yearDone(ys, allowShortYear)) return 'partial';
     const dt = new Date(year, mon - 1, day);
     return (mon >= 1 && mon <= 12 && dt.getMonth() === mon - 1 && dt.getDate() === day && year >= 1900) ? dt : 'bad';
   };
+  // Says what is wrong with an impossible date, e.g. "Feb has only 28 days".
+  const dateProblem = value => {
+    const { day, mon, year } = dateParts(value);
+    if (!(mon >= 1 && mon <= 12)) return t('errMonth');
+    const n = new Date(year, mon, 0).getDate();
+    if (!(day >= 1) || day > n) return t('errDayIn', { m: monthName(mon - 1), n });
+    return t('badDate');
+  };
   const maskInput = input => input.addEventListener('input', () => {
     const caretDigits = input.value.slice(0, input.selectionStart ?? input.value.length).replace(/\D/g, '').length;
-    const digits = input.value.replace(/\D/g, '').slice(0, 8);
-    input.value = formatDigits(digits);
+    const atEnd = (input.selectionStart ?? input.value.length) >= input.value.length;
+    input.value = tidyTyped(input.value);
+    if (atEnd) { const e = input.value.length; try { input.setSelectionRange(e, e); } catch (x) {} return; }   // typing at the end: stay at the end (after a typed '/')
     let pos = 0, seen = 0;                       // put the caret back after the same digit
     while (pos < input.value.length && seen < caretDigits) { if (/\d/.test(input.value[pos])) seen++; pos++; }
     try { input.setSelectionRange(pos, pos); } catch (e) {}
@@ -581,19 +607,18 @@
   // Shows the typed date in words under the box, or a red note if it can't exist.
   const showHint = (input, hintEl) => {
     const v = parseTyped(input.value, document.activeElement !== input);
-    const full = input.value.replace(/\D/g, '').length === 8;
-    input.classList.toggle('bad', v === 'bad' || (v === 'partial' && input.value.replace(/\D/g, '').length > 8));
+    input.classList.toggle('bad', v === 'bad');
     hintEl.classList.toggle('bad', v === 'bad');
-    hintEl.textContent = v instanceof Date ? fmtDate(v) : v === 'bad' && full ? t('badDate') : '';
+    hintEl.classList.toggle('okdate', v instanceof Date);
+    hintEl.textContent = v instanceof Date ? fmtDate(v) : v === 'bad' ? dateProblem(input.value) : '';
     return v;
   };
   // Calendar: start the picker on the typed date (or today); a picked date is written into the text box as DD/MM/YYYY.
   document.querySelectorAll('.dpick').forEach(pick => {
     const box = $(pick.dataset.for);
     const sync = () => {
-      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(box.value);
-      const d = todayDate();
-      pick.value = m ? `${m[3]}-${m[2]}-${m[1]}` : `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      const v = parseTyped(box.value, true), d = v instanceof Date ? v : todayDate();
+      pick.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     };
     pick.addEventListener('pointerdown', sync);
     pick.addEventListener('click', () => { sync(); try { pick.showPicker(); } catch (e) {} });
