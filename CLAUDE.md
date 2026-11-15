@@ -33,7 +33,7 @@ Methods (chosen once in Interest setup, saved as `cfg.method`):
 - `m30` **30-day months**: total days ÷ 30 × monthly interest. 12 × 30 = 360, so a real 365-day year counts as 12.17 months, about 1.4% more than daily.
 Example, ₹50,000 at 1.5%/month from 29-Dec-2025 to 15-Nov-2026 (321 days): daily ₹7,915.07 · m30 ₹8,025.
 A third method, "Months + days" (calendar months + extra days ÷ 30), was added and then removed on Sun, 15-Nov-2026 because it confused Stephin. Saved settings with `mdays` fall back to `daily`.
-Details shows interest per month and per day. Older saved settings without a valid method get `daily`.
+Details shows interest per month and per day, plus a "How it was worked out" line ("336 days × ₹66.0822 = ₹22,203.62" or "336 ÷ 30 = 11.2 months × ₹2,010 = ₹22,512"). Per-day is shown with up to 4 decimals (`moneyFine`) so it can be checked on a calculator. Interest is **not** rounded per day, like banks. Stephin chose this on Sun, 15-Nov-2026 after 336 × the rounded ₹66.08 came ₹0.74 short. Older saved settings without a valid method get `daily`.
 ("Once"/full term was removed: gold loans are monthly or yearly.)
 Discount panel: ₹ | % | Final amount (what they actually pay; the difference becomes the discount). A box under the input keeps "Total now", "After discount" and the difference (₹ and %) visible while typing.
 Round-off panel: ₹1 | ₹10 | ₹100 (default ₹10), done last. Skipped when Final amount is used.

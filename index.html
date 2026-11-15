@@ -69,6 +69,8 @@
     .bill .line strong { text-align:right; color:var(--on-dark); }
     .bill .line.gold strong { color:var(--gold-hi); }
     .bill .line.good strong { color:var(--good-on-dark); }
+    .bill .work { display:block; color:var(--on-dark); font-weight:700; text-align:right; }
+    .bill .work small { display:block; font-weight:400; color:var(--on-dark-2); font-size:14px; text-align:left; }
     .bill .note { font-size:14px; color:var(--on-dark-2); opacity:.85; margin:8px 0 2px; }
 
     /* Input card */
@@ -300,7 +302,7 @@
       principal: 'Principal', interest: 'Interest', perMonth: 'Interest per month', period: 'Period',
       beforeDiscount: 'Total before discount', beforeRound: 'Before round-off',
       years: n => `${n} year${n === 1 ? '' : 's'}`, months: n => `${n} month${n === 1 ? '' : 's'}`, days: n => `${n} day${n === 1 ? '' : 's'}`,
-      simple: 'Simple interest.', method: 'How interest is counted', perDay: 'Interest per day',
+      simple: 'Simple interest.', working: 'How it was worked out', method: 'How interest is counted', perDay: 'Interest per day',
       mDaily: 'Exact days (like banks)', mDailySub: 'Every day counts: yearly rate ÷ 365 per day.',
       m30: '30-day months', m30Sub: 'Total days ÷ 30 = months.',
       monthShort: 'month', yearShort: 'year', setupTitle: 'Interest setup', rateLabel: 'Interest rate',
@@ -325,7 +327,7 @@
       principal: 'அசல்', interest: 'வட்டி', perMonth: 'மாத வட்டி', period: 'காலம்',
       beforeDiscount: 'தள்ளுபடிக்கு முன்', beforeRound: 'ரவுண்ட் ஆஃப் முன்',
       years: n => `${n} ஆண்டு`, months: n => `${n} மாதம்`, days: n => `${n} நாள்`,
-      simple: 'தனி வட்டி.', method: 'வட்டி கணக்கிடும் முறை', perDay: 'நாள் வட்டி',
+      simple: 'தனி வட்டி.', working: 'கணக்கிட்ட விதம்', method: 'வட்டி கணக்கிடும் முறை', perDay: 'நாள் வட்டி',
       mDaily: 'சரியான நாட்கள் (வங்கிகள் போல)', mDailySub: 'ஒவ்வொரு நாளும் கணக்கு: ஆண்டு வட்டி ÷ 365 ஒரு நாளுக்கு.',
       m30: '30 நாள் மாதம்', m30Sub: 'மொத்த நாட்கள் ÷ 30 = மாதங்கள்.',
       monthShort: 'மாதம்', yearShort: 'ஆண்டு', setupTitle: 'வட்டி அமைப்பு', rateLabel: 'வட்டி விகிதம்',
@@ -350,7 +352,7 @@
       principal: 'മുതൽ', interest: 'പലിശ', perMonth: 'മാസ പലിശ', period: 'കാലയളവ്',
       beforeDiscount: 'ഇളവിന് മുമ്പ്', beforeRound: 'റൗണ്ട് ഓഫിന് മുമ്പ്',
       years: n => `${n} വർഷം`, months: n => `${n} മാസം`, days: n => `${n} ദിവസം`,
-      simple: 'സാധാരണ പലിശ.', method: 'പലിശ കണക്കാക്കുന്ന രീതി', perDay: 'ദിവസ പലിശ',
+      simple: 'സാധാരണ പലിശ.', working: 'കണക്കാക്കിയ വിധം', method: 'പലിശ കണക്കാക്കുന്ന രീതി', perDay: 'ദിവസ പലിശ',
       mDaily: 'കൃത്യമായ ദിവസങ്ങൾ (ബാങ്കുകളെ പോലെ)', mDailySub: 'ഓരോ ദിവസവും കണക്കാക്കും: വാർഷിക പലിശ ÷ 365 ഒരു ദിവസത്തിന്.',
       m30: '30 ദിവസ മാസം', m30Sub: 'ആകെ ദിവസം ÷ 30 = മാസം.',
       monthShort: 'മാസം', yearShort: 'വർഷം', setupTitle: 'പലിശ ക്രമീകരണം', rateLabel: 'പലിശ നിരക്ക്',
@@ -395,6 +397,8 @@
     return `${parts.join(' ')} ${rs}` + (paise ? ` ${paise} ${ps}` : '');
   };
 
+  // Up to 4 decimals, for per-day interest, so "days × per day" can be checked on a calculator.
+  const moneyFine = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(n);
   const money = n => {
     const r = Math.round(n * 100) / 100;
     const whole = Math.abs(r % 1) < 0.005;
@@ -594,8 +598,11 @@
       line(t('principal'), money(principal)) +
       line(`${t('interest')} (${cfg.rate}% / ${t(basis === 'annual' ? 'yearShort' : 'monthShort')})`, money(interest), 'gold') +
       line(t('perMonth'), money(perMonth)) +
-      line(t('perDay'), money(perDay)) +
+      line(t('perDay'), moneyFine(perDay)) +
       line(t('period'), periodText(start, end, days, true)) +
+      `<div class="line work"><small>${t('working')}</small>${cfg.method === 'daily'
+        ? `${L().days(days)} × ${moneyFine(perDay)} = ${money(interest)}`
+        : `${days} ÷ 30 = ${L().months(+(days / 30).toFixed(2))} × ${money(perMonth)} = ${money(interest)}`}</div>` +
       (hasDisc ? line(t('beforeDiscount'), money(subtotal)) + line(`${t('discount')} (${pct}%)`, '−' + money(diff), 'good') : '') +
       (hasRound ? line(t('beforeRound'), money(afterDisc)) + line(t('roundoff'), (roundDiff < 0 ? '−' : '+') + money(Math.abs(roundDiff))) : '') +
       `<p class="note">${t('simple')} ${t({ daily: 'mDailySub', m30: 'm30Sub' }[cfg.method])}</p>`;
