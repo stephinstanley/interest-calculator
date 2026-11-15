@@ -9,23 +9,25 @@ Plain HTML/CSS/JS installable web app (no build step) for working out simple int
 - `icons/icon.svg` — icon source. PNGs made with `qlmanage -t -s 512` and `sips -z` (no ImageMagick on this Mac).
 
 ## Screen design (redesigned Sun, 15-Nov-2026)
-Goal: everything fits on one phone screen with no scrolling (checked at 390×760). Stephin asked for less scrolling and no person's name.
+Mobile first: mobile is the main platform. Everything fits on one phone screen with no scrolling (checked at 360×640, 390×760 and 412 wide, in all three languages). Stephin asked for less scrolling and no person's name.
+Context: this is for a **gold finance** business. The interest rate and type (monthly/yearly) are fixed business settings, so they're never asked for on the main screen.
 - **Answer panel on top** (dark green): big total, a one-line summary (principal + interest, period, any discount/round-off). The full bill is behind a "Details" toggle. Errors show here too.
-- **Input rows** with short left labels: Amount (₹), Interest (rate % + Month | Year | Once switch), From, To (+ "Today" link).
+- **Rate chip** in the answer panel ("1.5% / month ✎") opens the **Interest setup** bottom sheet (`<dialog>`): rate + Per month | Per year, Save/Cancel. It's saved in localStorage (`interestCfg`), defaults to 1.5% per month, and Clear all doesn't reset it.
+- **Input rows** with short left labels: Amount (₹), From, To (+ "Today" link). Nothing else.
 - **Discount** and **Round-off** are "+" buttons that open small panels; × closes and resets them.
 - No name field, subtitle, hint text or footer. The calculation note lives inside Details.
 - `[hidden]` is forced to `display:none !important`, because component `display` rules would otherwise override it.
 
 ## Calculation
-Simple interest = Principal × Rate/100 × Period. Defaults: 1.5, Month (the family's usual rate: ₹1.5 per ₹100 per month). Month = days/30, Year = days/365, Once = rate charged one time (Period = 1, dates don't change it).
+Simple interest = Principal × Rate/100 × Period, using the saved setup. Default 1.5% per month (₹1.5 per ₹100 per month). Per month = days/30, per year = days/365. ("Once"/full term was removed: gold loans are monthly or yearly.)
 Discount panel: ₹ | % | Final amount (what they actually pay; the difference becomes the discount). A box under the input keeps "Total now", "After discount" and the difference (₹ and %) visible while typing.
 Round-off panel: ₹1 | ₹10 | ₹100 (default ₹10), done last. Skipped when Final amount is used.
-Details shows: principal, interest, interest per month (hidden for Once), period as months + days (total days), before discount / discount (%), before round-off / round-off.
+Details shows: principal, interest, interest per month, period as months + days (total days), before discount / discount (%), before round-off / round-off.
 Money shows no paise when whole (₹57,530), otherwise 2 decimals. Calculation is live; there is no Calculate button.
 Period months are calendar months (display only); per-month interest still uses days/30. Still waiting on the father: does he count by calendar months?
 
 ## Languages
-English, Tamil, Malayalam (EN | த | മ at the top right; choice saved in localStorage). All text lives in the `I18N` object in `index.html`, and elements use `data-t`. Month names come from `Intl.DateTimeFormat` (en-IN / ta-IN / ml-IN). Translations were written by Claude, so have a native speaker check them. Keep words short: the Malayalam "Once" is ഒരിക്കൽ because ഒറ്റത്തവണ overflowed.
+English, Tamil, Malayalam (EN | த | മ at the top right; choice saved in localStorage). All text lives in the `I18N` object in `index.html`, and elements use `data-t`. Month names come from `Intl.DateTimeFormat` (en-IN / ta-IN / ml-IN). Translations were written by Claude, so have a native speaker check them. Keep words short; long labels overflow on narrow phones.
 
 ## Dates
 Day / Month / Year dropdowns, not native `type=date` (Stephin found the native picker hard, especially picking the year). Month shows number and name (`12 · Dec`) because their records are written like 29/12/2025. An impossible date (31 Feb) turns the day box red and shows an error. Years 1990 to next year.

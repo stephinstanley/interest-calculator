@@ -43,6 +43,23 @@
     .bill .line strong { text-align:right; }
     .bill .note { font-size:14px; opacity:.78; margin:8px 0 2px; }
 
+    .hero-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .rate-chip { display:flex; align-items:center; gap:6px; border:1.5px solid #ffffff55; background:#ffffff1a; color:#fff; border-radius:18px; min-height:36px; padding:4px 12px; font-weight:700; font-size:15px; flex:none; }
+    .rate-chip:active { background:#ffffff33; }
+
+    /* Setup bottom sheet */
+    .sheet { border:0; padding:0; margin:auto auto 0; width:100%; max-width:520px; border-radius:22px 22px 0 0; background:#fff; color:#18231d; }
+    .sheet::backdrop { background:#0b1f1766; }
+    .sheet form { padding:10px 18px calc(18px + env(safe-area-inset-bottom)); }
+    .grab { width:44px; height:5px; border-radius:3px; background:#d0dad3; margin:0 auto 10px; }
+    .sheet h2 { margin:0 0 4px; font-size:21px; color:var(--green); }
+    .sheet-note { margin:0 0 14px; color:var(--muted); font-size:15px; }
+    .sheet-lbl { display:block; font-weight:700; font-size:16px; margin:0 0 6px; color:#3b4a41; }
+    .sheet .affix { margin-bottom:10px; }
+    .sheet-actions { display:grid; grid-template-columns:1fr 1.4fr; gap:10px; margin-top:16px; }
+    .btn { min-height:54px; border:0; border-radius:14px; background:var(--green); color:#fff; font-weight:800; font-size:18px; }
+    .btn.ghost { background:#eef3ef; color:var(--green); }
+
     /* Input rows */
     .rows { background:var(--card); border-radius:20px; padding:6px 14px; box-shadow:0 4px 18px #10251a0d; }
     .row { display:grid; grid-template-columns:64px 1fr; align-items:center; gap:10px; padding:9px 0; }
@@ -87,7 +104,18 @@
     .dnote .over { color:var(--red); }
 
     .clear { display:block; margin:14px auto 0; }
-    @media (max-width:350px) { .row { grid-template-columns:1fr; gap:6px; } .hero .total { font-size:34px; } }
+    input[type=number] { -moz-appearance:textfield; appearance:textfield; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+    @media (max-width:380px) {
+      main { padding-left:12px; padding-right:12px; }
+      .rows { padding:4px 12px; }
+      .row { grid-template-columns:54px 1fr; gap:8px; }
+      .row > .lbl { font-size:15px; }
+      .dmy { grid-template-columns:48px 1fr 68px; gap:5px; }
+      .dmy select { font-size:16px; padding:8px 18px 8px 7px; background-position:right 5px center; }
+      .hero .total { font-size:36px; }
+    }
+    @media (max-width:330px) { .row { grid-template-columns:1fr; gap:6px; } }
   </style>
 </head>
 <body>
@@ -103,7 +131,13 @@
 
   <!-- The answer, always on top -->
   <section class="hero" aria-live="polite">
-    <div class="cap" data-t="totalToPay">Total to pay</div>
+    <div class="hero-top">
+      <div class="cap" data-t="totalToPay">Total to pay</div>
+      <button type="button" class="rate-chip" id="rateChip" aria-haspopup="dialog">
+        <span id="rateChipText">1.5% / month</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
     <div id="total" class="total empty">₹0</div>
     <div id="err" class="err" role="alert" hidden></div>
     <div id="sum" class="sum"></div>
@@ -119,18 +153,6 @@
       <div class="row">
         <label class="lbl" for="principal" data-t="amount">Amount</label>
         <div class="affix pre"><span>₹</span><input id="principal" type="number" inputmode="decimal" min="0" step="0.01" placeholder="50000"></div>
-      </div>
-
-      <div class="row">
-        <label class="lbl" for="rate" data-t="rate">Interest</label>
-        <div class="rate">
-          <div class="affix suf"><input id="rate" type="number" inputmode="decimal" min="0" step="0.01" value="1.5"><span>%</span></div>
-          <div class="seg" role="radiogroup" aria-label="Rate period">
-            <label><input type="radio" name="basis" value="monthly" checked><span data-t="monthly">Month</span></label>
-            <label><input type="radio" name="basis" value="annual"><span data-t="annual">Year</span></label>
-            <label><input type="radio" name="basis" value="full"><span data-t="full">Once</span></label>
-          </div>
-        </div>
       </div>
 
       <div class="row" id="start">
@@ -176,6 +198,23 @@
     <button type="button" class="link clear" id="clearBtn" data-t="clear">Clear all</button>
   </form>
 </main>
+<dialog id="setup" class="sheet" aria-labelledby="setupTitle">
+  <form method="dialog" id="setupForm">
+    <div class="grab" aria-hidden="true"></div>
+    <h2 id="setupTitle" data-t="setupTitle">Interest setup</h2>
+    <p class="sheet-note" data-t="setupNote">Used for every calculation. Change it only when your rate changes.</p>
+    <label class="sheet-lbl" for="cfgRate" data-t="rateLabel">Interest rate</label>
+    <div class="affix suf"><input id="cfgRate" type="number" inputmode="decimal" min="0" step="0.01" required><span>%</span></div>
+    <div class="seg" role="radiogroup" aria-label="Rate period">
+      <label><input type="radio" name="cfgBasis" value="monthly"><span data-t="perMonthLong">Per month</span></label>
+      <label><input type="radio" name="cfgBasis" value="annual"><span data-t="perYearLong">Per year</span></label>
+    </div>
+    <div class="sheet-actions">
+      <button type="button" class="btn ghost" id="setupCancel" data-t="cancel">Cancel</button>
+      <button type="submit" class="btn" id="setupSave" data-t="save">Save</button>
+    </div>
+  </form>
+</dialog>
 <script>
   const $ = id => document.getElementById(id);
   const form = $('loanForm');
@@ -196,7 +235,10 @@
       principal: 'Principal', interest: 'Interest', perMonth: 'Interest per month', period: 'Period',
       beforeDiscount: 'Total before discount', beforeRound: 'Before round-off',
       months: n => `${n} month${n === 1 ? '' : 's'}`, days: n => `${n} day${n === 1 ? '' : 's'}`,
-      note: 'Simple interest. Month = 30 days, Year = 365 days. Once = rate charged one time, whatever the dates.',
+      note: 'Simple interest. Per month counts 30 days as a month; per year counts 365 days.',
+      monthShort: 'month', yearShort: 'year', setupTitle: 'Interest setup', rateLabel: 'Interest rate',
+      setupNote: 'Used for every calculation. Change it only when your rate changes.',
+      perMonthLong: 'Per month', perYearLong: 'Per year', save: 'Save', cancel: 'Cancel',
       errAmounts: 'Enter a valid amount and rate.',
       errDate: 'A date does not exist (e.g. 31 Feb).',
       errOrder: '"To" date is before "From" date.',
@@ -215,7 +257,10 @@
       principal: 'அசல்', interest: 'வட்டி', perMonth: 'மாத வட்டி', period: 'காலம்',
       beforeDiscount: 'தள்ளுபடிக்கு முன்', beforeRound: 'ரவுண்ட் ஆஃப் முன்',
       months: n => `${n} மாதம்`, days: n => `${n} நாள்`,
-      note: 'தனி வட்டி. மாதம் = 30 நாள், ஆண்டு = 365 நாள். ஒருமுறை = தேதிகளைப் பொருட்படுத்தாமல் ஒருமுறை மட்டும் வட்டி.',
+      note: 'தனி வட்டி. மாதத்திற்கு: 30 நாள் = ஒரு மாதம்; ஆண்டுக்கு: 365 நாள்.',
+      monthShort: 'மாதம்', yearShort: 'ஆண்டு', setupTitle: 'வட்டி அமைப்பு', rateLabel: 'வட்டி விகிதம்',
+      setupNote: 'ஒவ்வொரு கணக்கிற்கும் இது பயன்படும். வட்டி மாறினால் மட்டும் மாற்றவும்.',
+      perMonthLong: 'மாதத்திற்கு', perYearLong: 'ஆண்டுக்கு', save: 'சேமி', cancel: 'ரத்து',
       errAmounts: 'சரியான தொகையும் வட்டியும் உள்ளிடுங்கள்.',
       errDate: 'ஒரு தேதி தவறானது (எ.கா. பிப்ரவரி 31).',
       errOrder: '"வரை" தேதி "முதல்" தேதிக்கு முன் உள்ளது.',
@@ -234,7 +279,10 @@
       principal: 'മുതൽ', interest: 'പലിശ', perMonth: 'മാസ പലിശ', period: 'കാലയളവ്',
       beforeDiscount: 'ഇളവിന് മുമ്പ്', beforeRound: 'റൗണ്ട് ഓഫിന് മുമ്പ്',
       months: n => `${n} മാസം`, days: n => `${n} ദിവസം`,
-      note: 'സാധാരണ പലിശ. മാസം = 30 ദിവസം, വർഷം = 365 ദിവസം. ഒരിക്കൽ = തീയതി നോക്കാതെ ഒരു തവണ മാത്രം പലിശ.',
+      note: 'സാധാരണ പലിശ. മാസത്തിന്: 30 ദിവസം = ഒരു മാസം; വർഷത്തിന്: 365 ദിവസം.',
+      monthShort: 'മാസം', yearShort: 'വർഷം', setupTitle: 'പലിശ ക്രമീകരണം', rateLabel: 'പലിശ നിരക്ക്',
+      setupNote: 'എല്ലാ കണക്കിനും ഇത് ഉപയോഗിക്കും. നിരക്ക് മാറിയാൽ മാത്രം മാറ്റുക.',
+      perMonthLong: 'മാസത്തിന്', perYearLong: 'വർഷത്തിന്', save: 'സേവ് ചെയ്യുക', cancel: 'റദ്ദാക്കുക',
       errAmounts: 'ശരിയായ തുകയും പലിശയും നൽകുക.',
       errDate: 'ഒരു തീയതി തെറ്റാണ് (ഉദാ. ഫെബ്രുവരി 31).',
       errOrder: '"വരെ" തീയതി "മുതൽ" തീയതിക്ക് മുമ്പാണ്.',
@@ -254,6 +302,28 @@
     const whole = Math.abs(r % 1) < 0.005;
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 }).format(r);
   };
+
+  // ---------- Interest setup: set once, remembered on this phone ----------
+  let cfg = { rate: 1.5, basis: 'monthly' };
+  try {
+    const saved = JSON.parse(localStorage.getItem('interestCfg') || 'null');
+    if (saved && saved.rate >= 0 && (saved.basis === 'monthly' || saved.basis === 'annual')) cfg = saved;
+  } catch (e) {}
+  const showCfg = () => { $('rateChipText').textContent = `${cfg.rate}% / ${t(cfg.basis === 'annual' ? 'yearShort' : 'monthShort')}`; };
+  $('rateChip').addEventListener('click', () => {
+    $('cfgRate').value = cfg.rate;
+    document.querySelector(`input[name="cfgBasis"][value="${cfg.basis}"]`).checked = true;
+    $('setup').showModal();
+  });
+  $('setupCancel').addEventListener('click', () => $('setup').close());
+  $('setup').addEventListener('click', e => { if (e.target === $('setup')) $('setup').close(); }); // tap outside
+  $('setupForm').addEventListener('submit', () => {
+    const rate = Number($('cfgRate').value);
+    if (!($('cfgRate').value !== '' && rate >= 0)) return;
+    cfg = { rate, basis: document.querySelector('input[name="cfgBasis"]:checked').value };
+    try { localStorage.setItem('interestCfg', JSON.stringify(cfg)); } catch (e) {}
+    showCfg(); calc();
+  });
 
   // ---------- Dates: day / month / year dropdowns ----------
   const pad = n => String(n).padStart(2, '0');
@@ -321,18 +391,18 @@
       $('total').textContent = '₹0'; $('total').classList.add('empty');
     };
     $('err').hidden = true;
-    if ($('principal').value === '' || $('rate').value === '') {
+    if ($('principal').value === '') {
       fail(''); $('err').hidden = true; $('sum').textContent = t('enterAmount'); return;
     }
-    const principal = Number($('principal').value), rate = Number($('rate').value);
+    const principal = Number($('principal').value), rate = cfg.rate;
     const start = readDate($('start')), end = readDate($('end'));
     if (!start || !end) return fail(t('errDate'));
     if (!(principal >= 0) || !(rate >= 0)) return fail(t('errAmounts'));
     if (end < start) return fail(t('errOrder'));
 
     const days = Math.round((end - start) / 86400000);
-    const basis = radio('basis');
-    const periods = basis === 'full' ? 1 : basis === 'annual' ? days / 365 : days / 30;
+    const basis = cfg.basis;
+    const periods = basis === 'annual' ? days / 365 : days / 30;
     const interest = principal * (rate / 100) * periods;
     const subtotal = principal + interest;
 
@@ -369,12 +439,12 @@
     $('bill').hidden = $('detailsBtn').getAttribute('aria-expanded') !== 'true';
 
     // Full bill (behind "Details")
-    const perMonth = basis === 'monthly' ? principal * rate / 100 : basis === 'annual' ? principal * rate / 1200 : null;
+    const perMonth = basis === 'monthly' ? principal * rate / 100 : principal * rate / 1200;
     const line = (k, v) => `<div class="line"><span>${k}</span><strong>${v}</strong></div>`;
     $('bill').innerHTML =
       line(t('principal'), money(principal)) +
-      line(t('interest'), money(interest)) +
-      (perMonth !== null ? line(t('perMonth'), money(perMonth)) : '') +
+      line(`${t('interest')} (${cfg.rate}% / ${t(basis === 'annual' ? 'yearShort' : 'monthShort')})`, money(interest)) +
+      line(t('perMonth'), money(perMonth)) +
       line(t('period'), periodText(start, end, days, true)) +
       (hasDisc ? line(t('beforeDiscount'), money(subtotal)) + line(`${t('discount')} (${pct}%)`, '−' + money(diff)) : '') +
       (hasRound ? line(t('beforeRound'), money(afterDisc)) + line(t('roundoff'), (roundDiff < 0 ? '−' : '+') + money(Math.abs(roundDiff))) : '') +
@@ -388,6 +458,7 @@
     document.documentElement.lang = lang;
     document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
     document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+    showCfg();
     if ($('detailsBtn').getAttribute('aria-expanded') === 'true') $('detailsBtn').firstElementChild.textContent = t('hideDetails');
     for (const box of dateBoxes) {
       const name = t(box.id === 'start' ? 'from' : 'to');
@@ -406,8 +477,8 @@
 
   // ---------- Clear ----------
   $('clearBtn').addEventListener('click', () => {
-    $('principal').value = ''; $('discount').value = ''; $('rate').value = '1.5';
-    setRadio('basis', 'monthly'); setRadio('dtype', 'amount'); setRadio('round', '10');
+    $('principal').value = ''; $('discount').value = '';
+    setRadio('dtype', 'amount'); setRadio('round', '10');
     showPanel('discountPanel', 'addDiscount', false); showPanel('roundPanel', 'addRound', false);
     dateBoxes.forEach(box => setDate(box, new Date()));
     calc();
