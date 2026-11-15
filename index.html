@@ -92,29 +92,6 @@
     .dhint.bad, .dhint .bad { color:var(--bad); font-weight:700; }
     .dhint .link { min-height:28px; padding:2px 4px; }
     .today-btn { width:100%; min-height:52px; display:flex; align-items:center; justify-content:space-between; gap:8px; border:1.5px solid var(--field); border-radius:var(--r-md); background:var(--surface-2); padding:8px 14px; font-size:17px; color:var(--ink); text-align:left; }
-    .dwrap { position:relative; }
-    .dwrap .dinput { padding-right:54px; }
-    .cal { position:absolute; right:4px; top:50%; transform:translateY(-50%); width:46px; height:44px; border:0; border-radius:10px; background:var(--gold-tint); color:var(--gold-deep); display:grid; place-items:center; }
-    .cal:active { background:#F3E3B8; }
-
-    /* Date picker sheet */
-    .pk { padding:10px 16px calc(16px + env(safe-area-inset-bottom)); }
-    .pk-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-    .pk-top h2 { margin:0; font-size:20px; }
-    .pk-nav { display:grid; grid-template-columns:48px 1fr 48px; align-items:center; gap:6px; margin-bottom:6px; }
-    .pk-arrow { height:46px; border:0; border-radius:12px; background:var(--surface-2); font-size:28px; line-height:1; color:var(--ink); }
-    .pk-head { height:46px; border:0; border-radius:12px; background:none; font-size:19px; font-weight:800; color:var(--ink); display:flex; align-items:center; justify-content:center; gap:6px; }
-    .pk-head::after { content:""; width:9px; height:9px; border-right:2.5px solid var(--gold-deep); border-bottom:2.5px solid var(--gold-deep); transform:rotate(45deg) translateY(-3px); }
-    .pk-head.up::after { transform:rotate(-135deg) translateY(-2px); }
-    .pk-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; min-height:300px; align-content:start; }
-    .pk-grid.months { grid-template-columns:repeat(3, 1fr); gap:8px; }
-    .pk-wd { text-align:center; font-size:13px; font-weight:700; color:var(--text-3); padding:4px 0; }
-    .pk-day, .pk-mon { height:44px; border:0; border-radius:12px; background:none; font-size:18px; font-weight:600; color:var(--ink); }
-    .pk-mon { height:58px; background:var(--surface-2); font-weight:700; }
-    .pk-day:active, .pk-mon:active { background:var(--gold-tint); }
-    .pk-day.today, .pk-mon.today { box-shadow:inset 0 0 0 2px var(--gold); }
-    .pk-day.sel, .pk-mon.sel { background:var(--ink); color:var(--gold-hi); }
-    .pk-today { width:100%; margin-top:10px; }
     .today-btn > span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .today-btn b { font-weight:800; }
     .today-btn svg { color:var(--gold-deep); flex:none; }
@@ -216,7 +193,7 @@
       <div class="row">
         <label class="lbl" for="fromInput" data-t="from">From</label>
         <div>
-          <div class="dwrap"><input id="fromInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY"><button type="button" class="cal" data-pick="fromInput" aria-label="Calendar"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+          <input id="fromInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY">
           <div class="dhint" id="fromHint"></div>
         </div>
       </div>
@@ -226,10 +203,10 @@
         <div>
           <button type="button" class="today-btn" id="toToday">
             <span><b data-t="today">Today</b> · <span id="todayText"></span></span>
-            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>
           </button>
           <div id="toCustom" hidden>
-            <div class="dwrap"><input id="toInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY"><button type="button" class="cal" data-pick="toInput" aria-label="Calendar"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+            <input id="toInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY">
             <div class="dhint"><span id="toHint"></span><button type="button" class="link" id="backToday" data-t="useToday">Use today</button></div>
           </div>
         </div>
@@ -264,19 +241,6 @@
     <button type="button" class="link clear" id="clearBtn" data-t="clear">Clear all</button>
   </form>
 </main>
-<dialog id="picker" class="sheet" aria-labelledby="pkTitle">
-  <div class="pk">
-    <div class="grab" aria-hidden="true"></div>
-    <div class="pk-top"><h2 id="pkTitle">From</h2><button type="button" class="x" id="pkClose" aria-label="Close">×</button></div>
-    <div class="pk-nav">
-      <button type="button" class="pk-arrow" id="pkPrev" aria-label="Previous">‹</button>
-      <button type="button" class="pk-head" id="pkHead" aria-live="polite"></button>
-      <button type="button" class="pk-arrow" id="pkNext" aria-label="Next">›</button>
-    </div>
-    <div id="pkGrid" class="pk-grid"></div>
-    <button type="button" class="btn ghost pk-today" id="pkToday" data-t="today">Today</button>
-  </div>
-</dialog>
 <dialog id="setup" class="sheet" aria-labelledby="setupTitle">
   <form method="dialog" id="setupForm">
     <div class="grab" aria-hidden="true"></div>
@@ -451,72 +415,12 @@
     $('toCustom').hidden = today;
   };
   $('toToday').addEventListener('click', () => {
+    setToMode(false);
     $('toInput').value = toTyped(todayDate());
-    openPicker($('toInput'));   // picking a date switches "To" to the editable box
+    $('toInput').focus(); $('toInput').select();
+    calc();
   });
   $('backToday').addEventListener('click', () => { setToMode(true); calc(); });
-
-  // ---------- Calendar picker (bottom sheet) ----------
-  // Day grid; tap the month title for a 12-month grid with a year switcher.
-  const pk = { input: null, y: 0, m: 0, view: 'days', sel: null };
-  const sameDay = (a, b) => a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-  const openPicker = input => {
-    const v = parseTyped(input.value, true);
-    const base = v instanceof Date ? v : todayDate();
-    Object.assign(pk, { input, y: base.getFullYear(), m: base.getMonth(), view: 'days', sel: v instanceof Date ? v : null });
-    $('pkTitle').textContent = t(input.id === 'fromInput' ? 'from' : 'to');
-    renderPicker();
-    $('picker').showModal();
-  };
-  const renderPicker = () => {
-    const grid = $('pkGrid'), now = todayDate();
-    grid.innerHTML = '';
-    grid.classList.toggle('months', pk.view === 'months');
-    $('pkHead').classList.toggle('up', pk.view === 'months');
-    if (pk.view === 'days') {
-      $('pkHead').textContent = new Intl.DateTimeFormat(LOCALES[lang], { month: 'long', year: 'numeric' }).format(new Date(pk.y, pk.m, 1));
-      const wd = new Intl.DateTimeFormat(LOCALES[lang], { weekday: 'narrow' });
-      for (let i = 0; i < 7; i++) grid.insertAdjacentHTML('beforeend', `<div class="pk-wd">${wd.format(new Date(2023, 0, 1 + i))}</div>`); // 1-Jan-2023 was a Sunday
-      const first = new Date(pk.y, pk.m, 1).getDay(), count = new Date(pk.y, pk.m + 1, 0).getDate();
-      for (let i = 0; i < first; i++) grid.insertAdjacentHTML('beforeend', '<span></span>');
-      for (let d = 1; d <= count; d++) {
-        const dt = new Date(pk.y, pk.m, d);
-        const b = document.createElement('button');
-        b.type = 'button'; b.className = 'pk-day' + (sameDay(dt, now) ? ' today' : '') + (sameDay(dt, pk.sel) ? ' sel' : '');
-        b.textContent = d; b.setAttribute('aria-label', fmtDate(dt));
-        b.addEventListener('click', () => pickDate(dt));
-        grid.append(b);
-      }
-    } else {
-      $('pkHead').textContent = pk.y;
-      for (let m = 0; m < 12; m++) {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'pk-mon' + (pk.y === now.getFullYear() && m === now.getMonth() ? ' today' : '') + (pk.sel && pk.y === pk.sel.getFullYear() && m === pk.sel.getMonth() ? ' sel' : '');
-        b.textContent = monthName(m);
-        b.addEventListener('click', () => { pk.m = m; pk.view = 'days'; renderPicker(); });
-        grid.append(b);
-      }
-    }
-  };
-  const pickDate = dt => {
-    if (pk.input.id === 'toInput') setToMode(false);
-    pk.input.value = toTyped(dt);
-    $('picker').close();
-    calc();
-  };
-  const step = dir => {
-    if (pk.view === 'days') { const d = new Date(pk.y, pk.m + dir, 1); pk.y = d.getFullYear(); pk.m = d.getMonth(); }
-    else pk.y += dir;
-    renderPicker();
-  };
-  $('pkPrev').addEventListener('click', () => step(-1));
-  $('pkNext').addEventListener('click', () => step(1));
-  $('pkHead').addEventListener('click', () => { pk.view = pk.view === 'days' ? 'months' : 'days'; renderPicker(); });
-  $('pkToday').addEventListener('click', () => pickDate(todayDate()));
-  $('pkClose').addEventListener('click', () => $('picker').close());
-  $('picker').addEventListener('click', e => { if (e.target === $('picker')) $('picker').close(); });
-  document.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => openPicker($(b.dataset.pick))));
 
   // Shows the typed date in words under the box, or a red note if it can't exist.
   const showHint = (input, hintEl) => {

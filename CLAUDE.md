@@ -41,8 +41,7 @@ Typed on the number pad, the way the pledge receipt shows it (`DD/MM/YYYY`). It 
 - Slashes are added automatically (`29122025` → `29/12/2025`), and the caret is kept in place on edits/backspace.
 - A 2-digit year (`291225`) is accepted only when leaving the box, then expanded to `29/12/2025`, so typing "2025" doesn't flash 2020 at "20".
 - Under the box: the date in words (`Mon, 29-Dec-2025`), or red "This date does not exist" for 31/02.
-- **Both ways to enter** (Stephin is sharing the app with a friend who prefers picking): each date box has a gold calendar button that opens a custom **picker sheet** (`#picker`). It shows a day grid starting Sunday with month ‹ ›; tapping the month title switches to a 12-month grid with a year ‹ ›, so going back a year takes two taps. Today is ringed in gold, the selected date is an ink pill, and there's a Today button. Picking fills the typed box, which stays editable.
-- **To** defaults to a "Today · 15-Nov-2026 📅" button. Tapping it opens the picker; after a pick, To becomes the editable typed box with a "Use today" link.
+- **To** defaults to a "Today · 15-Nov-2026 ✎" button; tapping it opens the same typed box (prefilled with today) plus a "Use today" link.
 - Until From is complete, the answer panel says "Type the From date".
 - The period shows years, months and days (`2 years 6 months 5 days`); Details also shows total days.
 
