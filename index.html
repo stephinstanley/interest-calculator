@@ -121,10 +121,6 @@
     .extras { display:flex; gap:8px; margin:12px 0 0; }
     .chip { flex:1; min-height:50px; border:1.5px dashed #C9AE6E; border-radius:var(--r-md); background:#FFFFFF80; color:var(--gold-deep); font-weight:700; font-size:16px; padding:6px 10px; }
     .chip:active { background:var(--gold-tint); }
-    .chip.toggle { display:flex; align-items:center; justify-content:center; gap:8px; }
-    .chip .tick { width:20px; height:20px; border-radius:6px; border:2px solid #C9AE6E; flex:none; }
-    .chip.toggle[aria-pressed="true"] { border-style:solid; border-color:var(--ink); background:var(--gold-tint); color:var(--ink); }
-    .chip.toggle[aria-pressed="true"] .tick { border-color:var(--ink); background:var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1.5' fill='none' stroke='%23F2D27E' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center; }
     .panel { background:var(--surface); border-radius:var(--r-lg); padding:12px 14px 14px; margin-top:12px; box-shadow:var(--shadow); }
     .panel-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
     .panel-head b { font-size:16px; color:var(--ink); }
@@ -155,6 +151,10 @@
     .method small { display:block; font-size:14px; color:var(--text-2); line-height:1.3; }
     .method input:checked + span { border-color:var(--ink); background:var(--gold-tint); }
     .method input:checked + span::before { border-color:var(--ink); background:radial-gradient(circle, var(--ink) 0 4px, #fff 4.5px); }
+    .method.check span::before { border-radius:6px; }
+    .method.check input:checked + span::before { background:var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1.5' fill='none' stroke='%23F2D27E' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center; }
+    .hero .roundinfo { font-size:15px; color:var(--on-dark-2); margin:-2px 0 6px; }
+    .hero .roundinfo:empty { display:none; }
     .method input:focus-visible + span { outline:3px solid var(--gold); outline-offset:1px; }
     .sheet-actions { display:grid; grid-template-columns:1fr 1.4fr; gap:10px; margin-top:16px; }
 
@@ -196,6 +196,7 @@
     </div>
     <div id="total" class="total empty">₹0</div>
     <div id="err" class="err" role="alert" hidden></div>
+    <div id="roundInfo" class="roundinfo"></div>
     <div id="sum" class="sum"></div>
     <div id="bill" class="bill" hidden></div>
     <button type="button" class="details-btn" id="detailsBtn" aria-expanded="false" aria-controls="bill" hidden>
@@ -239,7 +240,6 @@
 
     <div class="extras">
       <button type="button" class="chip" id="addDiscount" data-t="addDiscount">+ Discount</button>
-      <button type="button" class="chip toggle" id="addRound" aria-pressed="false"><span class="tick" aria-hidden="true"></span><span data-t="addRound">Round off</span></button>
     </div>
 
     <section class="panel" id="discountPanel" hidden>
@@ -273,6 +273,7 @@
       <label class="method"><input type="radio" name="cfgMethod" value="daily"><span><b data-t="mDaily">Exact days</b><small data-t="mDailySub"></small></span></label>
       <label class="method"><input type="radio" name="cfgMethod" value="m30"><span><b data-t="m30">30-day months</b><small data-t="m30Sub"></small></span></label>
     </div>
+    <label class="method check" style="margin-top:12px"><input type="checkbox" id="cfgRound"><span><b data-t="roundSetting">Round off to nearest ₹1</b><small data-t="roundSettingSub"></small></span></label>
     <div class="sheet-actions">
       <button type="button" class="btn ghost" id="setupCancel" data-t="cancel">Cancel</button>
       <button type="submit" class="btn" id="setupSave" data-t="save">Save</button>
@@ -292,7 +293,7 @@
       amount: 'Amount', rate: 'Interest', monthly: 'Month', annual: 'Year', full: 'Once',
       from: 'From', to: 'To', today: 'Today', useToday: 'Use today', badDate: 'This date does not exist',
       enterFrom: 'Type the From date (e.g. 29/12/2025)', enterTo: 'Type the To date',
-      addDiscount: '+ Discount', addRound: 'Round off to ₹1', discount: 'Discount', roundoff: 'Round-off',
+      addDiscount: '+ Discount', roundSetting: 'Round off to nearest ₹1', roundSettingSub: 'Like banks: 50 paise or more rounds up.', discount: 'Discount', roundoff: 'Round-off',
       dFinal: 'Final amount', phDisc: { amount: 'Discount in ₹', percent: 'Discount in %', final: 'Amount they pay' },
       totalNow: 'Total now', afterDiscount: 'After discount', difference: 'Difference', overBy: 'Over the total by',
       clear: 'Clear all', enterAmount: 'Enter the amount',
@@ -317,7 +318,7 @@
       amount: 'தொகை', rate: 'வட்டி', monthly: 'மாதம்', annual: 'ஆண்டு', full: 'ஒருமுறை',
       from: 'முதல்', to: 'வரை', today: 'இன்று', useToday: 'இன்றைய தேதி', badDate: 'இந்த தேதி இல்லை',
       enterFrom: '"முதல்" தேதியை உள்ளிடுங்கள் (எ.கா. 29/12/2025)', enterTo: '"வரை" தேதியை உள்ளிடுங்கள்',
-      addDiscount: '+ தள்ளுபடி', addRound: '₹1-க்கு ரவுண்ட் ஆஃப்', discount: 'தள்ளுபடி', roundoff: 'ரவுண்ட் ஆஃப்',
+      addDiscount: '+ தள்ளுபடி', roundSetting: 'அருகிலுள்ள ₹1-க்கு ரவுண்ட் ஆஃப்', roundSettingSub: 'வங்கிகள் போல: 50 பைசா அல்லது அதற்கு மேல் இருந்தால் மேலே.', discount: 'தள்ளுபடி', roundoff: 'ரவுண்ட் ஆஃப்',
       dFinal: 'இறுதித் தொகை', phDisc: { amount: 'தள்ளுபடி ₹', percent: 'தள்ளுபடி %', final: 'அவர்கள் செலுத்தும் தொகை' },
       totalNow: 'இப்போதைய மொத்தம்', afterDiscount: 'தள்ளுபடிக்குப் பின்', difference: 'வித்தியாசம்', overBy: 'மொத்தத்தை விட அதிகம்',
       clear: 'அனைத்தையும் அழி', enterAmount: 'தொகையை உள்ளிடுங்கள்',
@@ -342,7 +343,7 @@
       amount: 'തുക', rate: 'പലിശ', monthly: 'മാസം', annual: 'വർഷം', full: 'ഒരിക്കൽ',
       from: 'മുതൽ', to: 'വരെ', today: 'ഇന്ന്', useToday: 'ഇന്നത്തെ തീയതി', badDate: 'ഈ തീയതി നിലവിലില്ല',
       enterFrom: '"മുതൽ" തീയതി നൽകുക (ഉദാ. 29/12/2025)', enterTo: '"വരെ" തീയതി നൽകുക',
-      addDiscount: '+ ഇളവ്', addRound: '₹1-ലേക്ക് റൗണ്ട് ഓഫ്', discount: 'ഇളവ്', roundoff: 'റൗണ്ട് ഓഫ്',
+      addDiscount: '+ ഇളവ്', roundSetting: 'അടുത്ത ₹1-ലേക്ക് റൗണ്ട് ഓഫ്', roundSettingSub: 'ബാങ്കുകളെ പോലെ: 50 പൈസയോ അതിൽ കൂടുതലോ ആണെങ്കിൽ മുകളിലേക്ക്.', discount: 'ഇളവ്', roundoff: 'റൗണ്ട് ഓഫ്',
       dFinal: 'അവസാന തുക', phDisc: { amount: 'ഇളവ് ₹', percent: 'ഇളവ് %', final: 'അവർ നൽകുന്ന തുക' },
       totalNow: 'ഇപ്പോഴത്തെ ആകെ', afterDiscount: 'ഇളവിന് ശേഷം', difference: 'വ്യത്യാസം', overBy: 'ആകെയേക്കാൾ കൂടുതൽ',
       clear: 'എല്ലാം മായ്ക്കുക', enterAmount: 'തുക നൽകുക',
@@ -406,7 +407,7 @@
   // ---------- Interest setup: set once, remembered on this phone ----------
   // method: 'daily' = exact days like banks (yearly rate ÷ 365 per day), 'm30' = total days ÷ 30.
   const METHODS = ['daily', 'm30'];
-  let cfg = { rate: 1.5, basis: 'monthly', method: 'daily' };
+  let cfg = { rate: 1.5, basis: 'monthly', method: 'daily', round: true };  // round: nearest ₹1, like banks
   try {
     const saved = JSON.parse(localStorage.getItem('interestCfg') || 'null');
     if (saved && saved.rate >= 0 && (saved.basis === 'monthly' || saved.basis === 'annual')) cfg = { ...cfg, ...saved };
@@ -417,6 +418,7 @@
     $('cfgRate').value = cfg.rate;
     document.querySelector(`input[name="cfgBasis"][value="${cfg.basis}"]`).checked = true;
     document.querySelector(`input[name="cfgMethod"][value="${cfg.method}"]`).checked = true;
+    $('cfgRound').checked = cfg.round !== false;
     $('setup').showModal();
   });
   $('setupCancel').addEventListener('click', () => $('setup').close());
@@ -424,7 +426,7 @@
   $('setupForm').addEventListener('submit', () => {
     const rate = Number($('cfgRate').value);
     if (!($('cfgRate').value !== '' && rate >= 0)) return;
-    cfg = { rate, basis: document.querySelector('input[name="cfgBasis"]:checked').value, method: document.querySelector('input[name="cfgMethod"]:checked').value };
+    cfg = { rate, basis: document.querySelector('input[name="cfgBasis"]:checked').value, method: document.querySelector('input[name="cfgMethod"]:checked').value, round: $('cfgRound').checked };
     try { localStorage.setItem('interestCfg', JSON.stringify(cfg)); } catch (e) {}
     showCfg(); calc();
   });
@@ -513,11 +515,6 @@
   const showPanel = (panel, chip, on) => { $(panel).hidden = !on; $(chip).hidden = on; };
   $('addDiscount').addEventListener('click', () => { showPanel('discountPanel', 'addDiscount', true); $('discount').focus(); calc(); });
   $('closeDiscount').addEventListener('click', () => { $('discount').value = ''; setRadio('dtype', 'amount'); showPanel('discountPanel', 'addDiscount', false); calc(); });
-  // Round-off: one on/off button, always to the nearest ₹1 (like banks: 50 paise and up rounds up).
-  $('addRound').addEventListener('click', () => {
-    $('addRound').setAttribute('aria-pressed', String($('addRound').getAttribute('aria-pressed') !== 'true'));
-    calc();
-  });
   $('detailsBtn').addEventListener('click', () => {
     const open = $('detailsBtn').getAttribute('aria-expanded') !== 'true';
     $('detailsBtn').setAttribute('aria-expanded', String(open));
@@ -533,7 +530,7 @@
     const fail = msg => {
       $('err').textContent = msg; $('err').hidden = false;
       $('sum').innerHTML = ''; $('detailsBtn').hidden = true; $('bill').hidden = true; $('dnote').hidden = true;
-      $('total').textContent = '₹0'; $('total').classList.add('empty');
+      $('total').textContent = '₹0'; $('total').classList.add('empty'); $('roundInfo').textContent = '';
     };
     $('err').hidden = true;
     readFrom(); if (!toIsToday) readTo();
@@ -576,7 +573,7 @@
     if (diff < 0) return fail(t('errFinal')), ($('dnote').hidden = false);
 
     // Round-off is last; skipped when they typed the final amount themselves.
-    const roundOn = $('addRound').getAttribute('aria-pressed') === 'true' && !(discOn && dtype === 'final');
+    const roundOn = cfg.round !== false && !(discOn && dtype === 'final');
     const step = 1;
     const total = roundOn ? Math.round(afterDisc / step) * step : afterDisc;
     const roundDiff = total - afterDisc;
@@ -586,7 +583,8 @@
     // Answer panel
     $('total').textContent = money(total);
     $('total').classList.remove('empty');
-    const extra = [hasDisc ? `<span class="good">−${money(diff)} ${t('discount').toLowerCase()}</span>` : '', hasRound ? `${roundDiff < 0 ? '−' : '+'}${money(Math.abs(roundDiff))} ${t('roundoff').toLowerCase()}` : ''].filter(Boolean).join(' · ');
+    $('roundInfo').textContent = hasRound ? `${t('beforeRound')} ${money(afterDisc)} · ${roundDiff < 0 ? '−' : '+'}${money(Math.abs(roundDiff))}` : '';
+    const extra = hasDisc ? `<span class="good">−${money(diff)} ${t('discount').toLowerCase()}</span>` : '';
     $('sum').innerHTML = `<div>${t('sumLine', { p: `<b>${money(principal)}</b>`, i: `<b class="gold">${money(interest)}</b>` })}</div><div>${periodText(start, end, days, false)}${extra ? ' · ' + extra : ''}</div>`;
     $('detailsBtn').hidden = false;
     $('bill').hidden = $('detailsBtn').getAttribute('aria-expanded') !== 'true';
@@ -631,7 +629,7 @@
   $('clearBtn').addEventListener('click', () => {
     $('principal').value = ''; $('discount').value = '';
     setRadio('dtype', 'amount');
-    showPanel('discountPanel', 'addDiscount', false); $('addRound').setAttribute('aria-pressed', 'false');
+    showPanel('discountPanel', 'addDiscount', false);
     $('fromInput').value = ''; $('toInput').value = ''; setToMode(true);
     calc();
     window.scrollTo({ top: 0, behavior: 'smooth' });

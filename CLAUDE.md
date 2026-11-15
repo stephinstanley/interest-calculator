@@ -14,7 +14,7 @@ Context: this is for a **gold finance** business. The interest rate and type (mo
 - **Answer panel on top** (ink card): big total, a one-line summary (principal + interest, period, any discount/round-off). Errors show here too. The full bill is behind a **"Show details ⌄ / Hide details ⌃" bar at the bottom of the card** (full width, centred). It must not sit top-left, where it looked like a heading.
 - **Rate chip** in the answer panel ("1.5% / month ✎") opens the **Interest setup** bottom sheet (`<dialog>`): rate + Per month | Per year, Save/Cancel. It's saved in localStorage (`interestCfg`), defaults to 1.5% per month, and Clear all doesn't reset it.
 - **Input rows** with short left labels: Amount (₹), From, To (+ "Today" link). Nothing else.
-- **+ Discount** opens a small panel (× closes and resets it). **Round off to ₹1** is a toggle chip.
+- **+ Discount** opens a small panel (× closes and resets it). Round-off isn't on the main screen; it's a setting.
 - No name field, subtitle, hint text or footer. The calculation note lives inside Details.
 - `[hidden]` is forced to `display:none !important`, because component `display` rules would otherwise override it.
 
@@ -33,10 +33,10 @@ Methods (chosen once in Interest setup, saved as `cfg.method`):
 - `m30` **30-day months**: total days ÷ 30 × monthly interest. 12 × 30 = 360, so a real 365-day year counts as 12.17 months, about 1.4% more than daily.
 Example, ₹50,000 at 1.5%/month from 29-Dec-2025 to 15-Nov-2026 (321 days): daily ₹7,915.07 · m30 ₹8,025.
 A third method, "Months + days" (calendar months + extra days ÷ 30), was added and then removed on Sun, 15-Nov-2026 because it confused Stephin. Saved settings with `mdays` fall back to `daily`.
-Details shows interest per month and per day, plus a "How it was worked out" line ("336 days × ₹66.0822 = ₹22,203.62" or "336 ÷ 30 = 11.2 months × ₹2,010 = ₹22,512"). Per-day is shown with up to 4 decimals (`moneyFine`) so it can be checked on a calculator. Interest is **not** rounded per day, like banks. Stephin chose this on Sun, 15-Nov-2026 after 336 × the rounded ₹66.08 came ₹0.74 short. Older saved settings without a valid method get `daily`.
+Details shows interest per month and per day, plus a "How it was worked out" line ("336 days × ₹66.0822 = ₹22,203.62" or "336 ÷ 30 = 11.2 months × ₹2,010 = ₹22,512"). Per-day is shown with up to 4 decimals (`moneyFine`) so it can be checked on a calculator. Interest is **not** rounded per day, like banks. Stephin chose this on Sun, 15-Nov-2026 after 336 × the rounded ₹66.08 came ₹0.74 short. Older saved settings without a valid method get `daily`; without `round` they get rounding on.
 ("Once"/full term was removed: gold loans are monthly or yearly.)
 Discount panel: ₹ | % | Final amount (what they actually pay; the difference becomes the discount). A box under the input keeps "Total now", "After discount" and the difference (₹ and %) visible while typing.
-Round-off is **one on/off button** ("Round off to ₹1", a checkbox-style chip next to + Discount), always to the nearest rupee like banks (50 paise and up rounds up), done last. The ₹10/₹100 options were removed on Sun, 15-Nov-2026: for a small gold finance shop it's only "round or not". It's off by default, and Clear all turns it off. Skipped when Final amount is used.
+Round-off is a **saved setting** in Interest setup (`cfg.round`, default **on**): "Round off to nearest ₹1", like banks (50 paise and up rounds up), done last. When it changes the total, the answer card shows a line under the big total: "Before round-off ₹1,56,335.78 · +₹0.22". It's skipped when the discount type is Final amount. History: it was a ₹1/₹10/₹100 panel, then an on/off chip, then (Sun, 15-Nov-2026) a setting, because the father always rounds.
 Details shows: principal, interest, interest per month, period as months + days (total days), before discount / discount (%), before round-off / round-off.
 Money shows no paise when whole (₹57,530), otherwise 2 decimals. Calculation is live; there is no Calculate button.
 Period years/months are calendar-based. The interest method is a setting (see above).
