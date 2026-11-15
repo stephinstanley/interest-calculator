@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173b32">
+  <title>Interest Calculator</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Interest Calc">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <style>
+    :root { color-scheme: light; --green:#173b32; --bg:#f4f6f2; --card:#fff; --muted:#66736c; }
+    * { box-sizing:border-box }
+    body { margin:0; font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:#18231d; }
+    main { max-width:560px; margin:0 auto; padding:22px 16px 36px; }
+    header { margin:4px 0 22px; }
+    h1 { font-size:27px; margin:0 0 5px; color:var(--green); }
+    .sub { color:var(--muted); margin:0; }
+    .card { background:var(--card); border-radius:18px; padding:20px; box-shadow:0 5px 22px #10251a0c; margin-bottom:16px; }
+    label { display:block; font-weight:650; margin:14px 0 6px; }
+    input, select { width:100%; min-height:48px; border:1px solid #d5ddd7; border-radius:11px; padding:10px 12px; font:inherit; background:#fff; color:#18231d; }
+    .two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    button { width:100%; border:0; border-radius:12px; min-height:50px; padding:12px 16px; font:inherit; font-weight:700; background:var(--green); color:white; margin-top:18px; }
+    .result { background:#e7f0e9; border-radius:14px; padding:16px; margin-top:18px; }
+    .result .big { font-size:30px; font-weight:800; color:var(--green); margin:3px 0 10px; overflow-wrap:anywhere; }
+    .line { display:flex; justify-content:space-between; gap:16px; padding:7px 0; border-top:1px solid #d1e0d5; }
+    .line span:first-child { color:#53635a; }
+    .hint { color:var(--muted); font-size:13px; margin:10px 0 0; }
+    .error { color:#a12d2d; background:#fbeaea; border-radius:10px; padding:10px 12px; margin:14px 0 0; font-weight:600; }
+    footer { text-align:center; color:var(--muted); font-size:12px; padding:8px 8px 0; }
+    @media(max-width:390px){ .two{grid-template-columns:1fr} .card{padding:16px} }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Interest Calculator</h1>
+    <p class="sub">Work out how much someone owes you.</p>
+  </header>
+  <section class="card">
+    <form id="loanForm">
+      <label for="person">Person's name (optional)</label>
+      <input id="person" type="text" placeholder="e.g. Arun">
+
+      <label for="principal">Principal amount (₹)</label>
+      <input id="principal" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 50000" required>
+
+      <div class="two">
+        <div>
+          <label for="rate">Interest rate (%)</label>
+          <input id="rate" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 12" required>
+        </div>
+        <div>
+          <label for="basis">Rate period</label>
+          <select id="basis">
+            <option value="annual">Per year</option>
+            <option value="monthly">Per month</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="two">
+        <div>
+          <label for="start">Starting date</label>
+          <input id="start" type="date" required>
+        </div>
+        <div>
+          <label for="end">End date</label>
+          <input id="end" type="date" required>
+        </div>
+      </div>
+      <p id="error" class="error" role="alert" hidden></p>
+      <button type="submit">Calculate total</button>
+    </form>
+
+    <div id="result" class="result" hidden aria-live="polite">
+      <div id="personResult" class="sub"></div>
+      <div class="sub">Total amount to be paid</div>
+      <div id="total" class="big">₹0.00</div>
+      <div class="line"><span>Principal</span><strong id="principalOut"></strong></div>
+      <div class="line"><span>Interest</span><strong id="interestOut"></strong></div>
+      <div class="line"><span>Period</span><strong id="daysOut"></strong></div>
+      <p class="hint">Calculated using simple interest, not compound interest. Annual rates use 365 days; monthly rates use 30 days.</p>
+    </div>
+  </section>
+  <footer>Calculations are estimates. Confirm the rate and dates agreed with the person.</footer>
+</main>
+<script>
+  const $ = id => document.getElementById(id);
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  $('start').value = `${yyyy}-${mm}-${dd}`;
+  $('end').value = `${yyyy}-${mm}-${dd}`;
+  const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(n);
+
+  $('loanForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const showError = msg => { $('error').textContent = msg; $('error').hidden = false; $('result').hidden = true; };
+    $('error').hidden = true;
+    const principal = Number($('principal').value);
+    const rate = Number($('rate').value);
+    const start = new Date($('start').value + 'T00:00:00');
+    const end = new Date($('end').value + 'T00:00:00');
+    if (!Number.isFinite(principal) || principal < 0 || !Number.isFinite(rate) || rate < 0) {
+      showError('Enter valid amounts and interest rate.'); return;
+    }
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
+      showError('End date must be on or after the starting date.'); return;
+    }
+    const days = Math.round((end-start)/86400000);
+    const yearFraction = $('basis').value === 'annual' ? days/365 : days/30;
+    const interest = principal * (rate/100) * yearFraction;
+    const total = principal + interest;
+    $('personResult').textContent = $('person').value.trim() ? `For ${$('person').value.trim()}` : '';
+    $('total').textContent = money(total);
+    $('principalOut').textContent = money(principal);
+    $('interestOut').textContent = money(interest);
+    $('daysOut').textContent = `${days} day${days===1?'':'s'}`;
+    $('result').hidden = false;
+  });
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  }
+</script>
+</body>
+</html>
