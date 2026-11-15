@@ -1,6 +1,6 @@
 // Bump CACHE when the file list changes. Pages use network-first, so code
 // fixes reach installed phones on the next online launch without a bump.
-const CACHE = "interest-calculator-v3";
+const CACHE = "interest-calculator-v4";
 const FILES = [
   "./",
   "./index.html",

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#173b32">
+  <meta name="theme-color" content="#F7F4EC">
   <title>Interest Calculator</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
@@ -13,97 +13,124 @@
   <meta name="apple-mobile-web-app-title" content="Interest Calc">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <style>
-    :root { color-scheme: light; --green:#173b32; --green2:#24584a; --bg:#f4f6f2; --card:#fff; --muted:#5d6b63; --line:#d6e2da; --soft:#e7f0e9; --red:#a12d2d; --field:#c9d6cd; }
+    /* ===== Design tokens: "Ink & Gold" =====
+       Ink = structure, text, primary actions. Gold = money and focus only.
+       Green = money saved (discount). Red = errors. Warm ivory background. */
+    :root {
+      color-scheme: light;
+      --bg:#F7F4EC; --surface:#FFFFFF; --surface-2:#F2EDE1; --line:#ECE5D6; --field:#DCD2BC;
+      --ink:#1A1814; --ink-2:#2B2620; --text-2:#5E574A; --text-3:#77705F;
+      --gold:#C9972B; --gold-hi:#F2D27E; --gold-deep:#85600F; --gold-tint:#FBF3DE;
+      --on-dark:#FFFFFF; --on-dark-2:#CFC6B2; --on-dark-line:#FFFFFF1F;
+      --good:#1E7A4C; --good-on-dark:#93D6AE; --bad:#B3261E; --bad-tint:#FCEBEA;
+      --r-lg:22px; --r-md:14px; --r-sm:10px;
+      --shadow:0 1px 2px #1a18140d, 0 6px 20px #1a18140f;
+    }
     * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     [hidden] { display:none !important; }
-    body { margin:0; font:18px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Tamil","Noto Sans Malayalam",sans-serif; background:var(--bg); color:#18231d; }
+    body { margin:0; font:18px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Tamil","Noto Sans Malayalam",sans-serif; background:var(--bg); color:var(--ink); font-variant-numeric:tabular-nums; }
     main { max-width:520px; margin:0 auto; padding:max(12px, env(safe-area-inset-top)) 16px 28px; }
-    button { font:inherit; cursor:pointer; }
+    button { font:inherit; cursor:pointer; color:inherit; }
+    :focus-visible { outline:3px solid var(--gold); outline-offset:2px; }
 
     /* Top bar */
     .top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
-    h1 { font-size:20px; margin:0; color:var(--green); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .langs { display:flex; background:#fff; border:1.5px solid var(--field); border-radius:20px; padding:2px; flex:none; }
-    .langs button { border:0; background:none; color:var(--green); font-weight:700; font-size:15px; min-width:38px; min-height:34px; padding:0 8px; border-radius:16px; }
-    .langs button[aria-pressed="true"] { background:var(--green); color:#fff; }
+    .brand { display:flex; align-items:center; gap:9px; min-width:0; }
+    .mark { flex:none; width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:radial-gradient(circle at 35% 30%, #F6DE9A, var(--gold) 70%); color:var(--ink); font-weight:800; font-size:18px; box-shadow:inset 0 0 0 1px #00000014; }
+    h1 { font-size:19px; margin:0; color:var(--ink); font-weight:750; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .langs { display:flex; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:3px; flex:none; box-shadow:var(--shadow); }
+    .langs button { border:0; background:none; color:var(--text-2); font-weight:700; font-size:15px; min-width:38px; min-height:34px; padding:0 8px; border-radius:16px; }
+    .langs button[aria-pressed="true"] { background:var(--ink); color:var(--gold-hi); }
 
-    /* Answer panel */
-    .hero { background:var(--green); color:#fff; border-radius:20px; padding:16px 18px 10px; margin-bottom:14px; }
-    .hero .cap { font-size:15px; opacity:.8; }
-    .hero .total { font-size:40px; line-height:1.1; font-weight:800; margin:2px 0 6px; overflow-wrap:anywhere; letter-spacing:-.5px; }
-    .hero .total.empty { opacity:.45; }
-    .hero .sum { font-size:16px; opacity:.92; }
+    /* Answer panel (ink card, gold money) */
+    .hero { position:relative; overflow:hidden; background:linear-gradient(160deg, var(--ink-2), var(--ink) 60%); color:var(--on-dark); border-radius:var(--r-lg); padding:16px 18px 10px; margin-bottom:14px; box-shadow:0 10px 28px #1a181433; }
+    .hero::before { content:""; position:absolute; inset:0 0 auto; height:3px; background:linear-gradient(90deg, transparent, var(--gold), transparent); }
+    .hero::after { content:""; position:absolute; width:220px; height:220px; right:-90px; top:-110px; background:radial-gradient(circle, #C9972B33, transparent 65%); pointer-events:none; }
+    .hero > * { position:relative; z-index:1; }
+    .hero-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .hero .cap { font-size:15px; color:var(--on-dark-2); }
+    .hero .total { font-size:42px; line-height:1.1; font-weight:800; margin:4px 0 6px; overflow-wrap:anywhere; letter-spacing:-1px; color:var(--gold-hi); }
+    .hero .total.empty { color:#ffffff40; }
+    .hero .sum { font-size:16px; color:var(--on-dark-2); }
+    .hero .sum b { color:var(--on-dark); font-weight:700; }
+    .hero .sum .gold { color:var(--gold-hi); }
+    .hero .sum .good { color:var(--good-on-dark); }
     .hero .sum div + div { margin-top:2px; }
-    .hero .err { background:#fff; color:var(--red); border-radius:10px; padding:8px 10px; font-weight:700; font-size:16px; margin:6px 0 4px; }
-    .details-btn { display:flex; align-items:center; gap:6px; margin:8px 0 0 -6px; padding:6px; min-height:36px; border:0; background:none; color:#fff; font-weight:700; font-size:15px; opacity:.9; }
-    .details-btn svg { transition:transform .2s; }
+    .hero .err { background:var(--bad-tint); color:var(--bad); border-radius:var(--r-sm); padding:8px 10px; font-weight:700; font-size:16px; margin:6px 0 4px; }
+    .rate-chip { display:flex; align-items:center; gap:6px; border:1px solid #C9972B80; background:#C9972B1F; color:var(--gold-hi); border-radius:18px; min-height:36px; padding:4px 12px; font-weight:700; font-size:15px; flex:none; }
+    .rate-chip:active { background:#C9972B40; }
+    .details-btn { display:flex; align-items:center; gap:6px; margin:8px 0 0 -6px; padding:6px; min-height:36px; border:0; background:none; color:var(--on-dark); font-weight:700; font-size:15px; }
+    .details-btn svg { transition:transform .2s; color:var(--gold); }
     .details-btn[aria-expanded="true"] svg { transform:rotate(180deg); }
     .bill { margin:4px 0 6px; font-size:16px; }
-    .bill .line { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-top:1px solid #ffffff2b; }
-    .bill .line strong { text-align:right; }
-    .bill .note { font-size:14px; opacity:.78; margin:8px 0 2px; }
+    .bill .line { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-top:1px solid var(--on-dark-line); color:var(--on-dark-2); }
+    .bill .line strong { text-align:right; color:var(--on-dark); }
+    .bill .line.gold strong { color:var(--gold-hi); }
+    .bill .line.good strong { color:var(--good-on-dark); }
+    .bill .note { font-size:14px; color:var(--on-dark-2); opacity:.85; margin:8px 0 2px; }
 
-    .hero-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
-    .rate-chip { display:flex; align-items:center; gap:6px; border:1.5px solid #ffffff55; background:#ffffff1a; color:#fff; border-radius:18px; min-height:36px; padding:4px 12px; font-weight:700; font-size:15px; flex:none; }
-    .rate-chip:active { background:#ffffff33; }
-
-    /* Setup bottom sheet */
-    .sheet { border:0; padding:0; margin:auto auto 0; width:100%; max-width:520px; border-radius:22px 22px 0 0; background:#fff; color:#18231d; }
-    .sheet::backdrop { background:#0b1f1766; }
-    .sheet form { padding:10px 18px calc(18px + env(safe-area-inset-bottom)); }
-    .grab { width:44px; height:5px; border-radius:3px; background:#d0dad3; margin:0 auto 10px; }
-    .sheet h2 { margin:0 0 4px; font-size:21px; color:var(--green); }
-    .sheet-note { margin:0 0 14px; color:var(--muted); font-size:15px; }
-    .sheet-lbl { display:block; font-weight:700; font-size:16px; margin:0 0 6px; color:#3b4a41; }
-    .sheet .affix { margin-bottom:10px; }
-    .sheet-actions { display:grid; grid-template-columns:1fr 1.4fr; gap:10px; margin-top:16px; }
-    .btn { min-height:54px; border:0; border-radius:14px; background:var(--green); color:#fff; font-weight:800; font-size:18px; }
-    .btn.ghost { background:#eef3ef; color:var(--green); }
-
-    /* Input rows */
-    .rows { background:var(--card); border-radius:20px; padding:6px 14px; box-shadow:0 4px 18px #10251a0d; }
+    /* Input card */
+    .rows { background:var(--surface); border-radius:var(--r-lg); padding:6px 14px; box-shadow:var(--shadow); }
     .row { display:grid; grid-template-columns:64px 1fr; align-items:center; gap:10px; padding:9px 0; }
-    .row + .row { border-top:1px solid #edf2ee; }
-    .row > .lbl { font-weight:700; font-size:16px; color:#3b4a41; line-height:1.2; }
+    .row + .row { border-top:1px solid var(--line); }
+    .row > .lbl { font-weight:700; font-size:16px; color:var(--text-2); line-height:1.2; }
     .row > .lbl .link { display:block; margin:4px 0 0 -4px; }
-    input, select { width:100%; min-height:52px; border:1.5px solid var(--field); border-radius:12px; padding:8px 12px; font:inherit; font-size:19px; background:#fff; color:#18231d; }
-    input:focus, select:focus { outline:3px solid #9cc2ac; outline-offset:1px; border-color:var(--green); }
-    input::placeholder { color:#9aa69f; }
+    input, select { width:100%; min-height:52px; border:1.5px solid var(--field); border-radius:var(--r-md); padding:8px 12px; font:inherit; font-size:19px; background:var(--surface); color:var(--ink); transition:border-color .15s, box-shadow .15s; }
+    input:focus, select:focus { outline:none; border-color:var(--gold); box-shadow:0 0 0 4px #C9972B33; }
+    #principal { font-weight:700; font-size:21px; }
+    input::placeholder { color:var(--text-3); font-weight:400; }
     select { appearance:none; -webkit-appearance:none; padding-right:30px;
-      background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.2 1.2l4.8 4.8 4.8-4.8' fill='none' stroke='%23173b32' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center; }
+      background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.2 1.2l4.8 4.8 4.8-4.8' fill='none' stroke='%2385600F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center; }
     .affix { position:relative; }
-    .affix span { position:absolute; top:50%; transform:translateY(-50%); color:var(--muted); font-weight:700; pointer-events:none; }
-    .affix.pre span { left:13px; } .affix.pre input { padding-left:32px; }
-    .affix.suf span { right:12px; } .affix.suf input { padding-right:30px; }
-    .rate { display:grid; gap:8px; }
+    .affix span { position:absolute; top:50%; transform:translateY(-50%); color:var(--gold-deep); font-weight:800; pointer-events:none; }
+    .affix.pre span { left:14px; } .affix.pre input { padding-left:34px; }
+    .affix.suf span { right:14px; } .affix.suf input { padding-right:32px; }
     .dmy { display:grid; grid-template-columns:54px 1fr 74px; gap:6px; }
     .dmy select { padding:8px 20px 8px 8px; background-position:right 6px center; font-size:17px; }
-    .dmy select.bad { border-color:var(--red); color:var(--red); }
+    .dmy select.bad { border-color:var(--bad); color:var(--bad); background-color:var(--bad-tint); }
 
-    /* Segmented switch */
-    .seg { display:flex; background:#eef3ef; border-radius:12px; padding:3px; gap:3px; min-height:48px; }
+    /* Segmented switch: selected = ink pill */
+    .seg { display:flex; background:var(--surface-2); border-radius:var(--r-md); padding:4px; gap:4px; min-height:50px; }
     .seg label { flex:1; min-width:0; position:relative; display:flex; }
     .seg input { position:absolute; opacity:0; width:1px; height:1px; min-height:0; }
-    .seg span { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; border-radius:9px; font-weight:700; font-size:15px; line-height:1.15; color:var(--green2); padding:2px 4px; }
-    .seg input:checked + span { background:#fff; color:var(--green); box-shadow:0 1px 4px #0b2a1c26; }
-    .seg input:focus-visible + span { outline:3px solid #9cc2ac; }
+    .seg span { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; border-radius:var(--r-sm); font-weight:700; font-size:15px; line-height:1.15; color:var(--text-2); padding:2px 4px; transition:background .15s, color .15s; }
+    .seg input:checked + span { background:var(--ink); color:var(--gold-hi); box-shadow:0 2px 6px #1a181430; }
+    .seg input:focus-visible + span { outline:3px solid var(--gold); outline-offset:1px; }
 
-    button.link { border:0; background:none; color:var(--green); font-weight:700; font-size:15px; text-decoration:underline; padding:4px; min-height:32px; }
+    /* Buttons */
+    .btn { min-height:54px; border:0; border-radius:var(--r-md); background:var(--ink); color:var(--gold-hi); font-weight:800; font-size:18px; }
+    .btn:active { background:var(--ink-2); }
+    .btn.ghost { background:var(--surface-2); color:var(--ink); }
+    button.link { border:0; background:none; color:var(--gold-deep); font-weight:700; font-size:15px; text-decoration:underline; text-underline-offset:3px; padding:4px; min-height:32px; }
 
     /* Extras: discount and round-off */
     .extras { display:flex; gap:8px; margin:12px 0 0; }
-    .chip { flex:1; min-height:48px; border:1.5px dashed #9fb5a8; border-radius:14px; background:none; color:var(--green); font-weight:700; font-size:16px; padding:6px 10px; }
-    .panel { background:var(--card); border-radius:20px; padding:12px 14px 14px; margin-top:12px; box-shadow:0 4px 18px #10251a0d; }
+    .chip { flex:1; min-height:50px; border:1.5px dashed #C9AE6E; border-radius:var(--r-md); background:#FFFFFF80; color:var(--gold-deep); font-weight:700; font-size:16px; padding:6px 10px; }
+    .chip:active { background:var(--gold-tint); }
+    .panel { background:var(--surface); border-radius:var(--r-lg); padding:12px 14px 14px; margin-top:12px; box-shadow:var(--shadow); }
     .panel-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-    .panel-head b { font-size:16px; color:#3b4a41; }
-    .x { border:0; background:#eef3ef; color:var(--green); border-radius:50%; width:34px; height:34px; font-size:20px; line-height:1; }
+    .panel-head b { font-size:16px; color:var(--ink); }
+    .x { border:0; background:var(--surface-2); color:var(--text-2); border-radius:50%; width:36px; height:36px; font-size:20px; line-height:1; }
     .panel .seg { margin-bottom:8px; }
-    .dnote { background:var(--soft); border-radius:12px; padding:9px 12px; margin-top:8px; font-size:16px; }
+    .dnote { background:var(--gold-tint); border:1px solid #EFDFB4; border-radius:var(--r-md); padding:10px 12px; margin-top:8px; font-size:16px; color:var(--text-2); }
     .dnote div { display:flex; justify-content:space-between; gap:10px; }
-    .dnote .diff { font-weight:800; color:var(--green); border-top:1px solid var(--line); margin-top:5px; padding-top:5px; }
-    .dnote .over { color:var(--red); }
+    .dnote strong { color:var(--ink); }
+    .dnote .diff { font-weight:800; color:var(--good); border-top:1px solid #EADBB0; margin-top:6px; padding-top:6px; }
+    .dnote .over { color:var(--bad); }
 
-    .clear { display:block; margin:14px auto 0; }
+    /* Setup bottom sheet */
+    .sheet { border:0; padding:0; margin:auto auto 0; width:100%; max-width:520px; border-radius:24px 24px 0 0; background:var(--surface); color:var(--ink); box-shadow:0 -10px 40px #1a181433; }
+    .sheet::backdrop { background:#1A181480; }
+    .sheet form { padding:10px 18px calc(18px + env(safe-area-inset-bottom)); }
+    .grab { width:44px; height:5px; border-radius:3px; background:var(--field); margin:0 auto 12px; }
+    .sheet h2 { margin:0 0 4px; font-size:21px; color:var(--ink); }
+    .sheet-note { margin:0 0 14px; color:var(--text-2); font-size:15px; }
+    .sheet-lbl { display:block; font-weight:700; font-size:16px; margin:0 0 6px; color:var(--text-2); }
+    .sheet .affix { margin-bottom:10px; }
+    .sheet #cfgRate { font-weight:700; font-size:22px; }
+    .sheet-actions { display:grid; grid-template-columns:1fr 1.4fr; gap:10px; margin-top:16px; }
+
+    .clear { display:block; margin:14px auto 0; color:var(--text-2) !important; }
     input[type=number] { -moz-appearance:textfield; appearance:textfield; }
     input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
     @media (max-width:380px) {
@@ -113,15 +140,17 @@
       .row > .lbl { font-size:15px; }
       .dmy { grid-template-columns:48px 1fr 68px; gap:5px; }
       .dmy select { font-size:16px; padding:8px 18px 8px 7px; background-position:right 5px center; }
-      .hero .total { font-size:36px; }
+      .hero .total { font-size:38px; }
+      h1 { font-size:17px; }
     }
     @media (max-width:330px) { .row { grid-template-columns:1fr; gap:6px; } }
+    @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
   </style>
 </head>
 <body>
 <main>
   <div class="top">
-    <h1 data-t="title">Interest Calculator</h1>
+    <div class="brand"><span class="mark" aria-hidden="true">₹</span><h1 data-t="title">Interest Calculator</h1></div>
     <div class="langs" role="group" aria-label="Language">
       <button type="button" data-lang="en" lang="en" aria-label="English">EN</button>
       <button type="button" data-lang="ta" lang="ta" aria-label="தமிழ்">த</button>
@@ -433,20 +462,20 @@
     // Answer panel
     $('total').textContent = money(total);
     $('total').classList.remove('empty');
-    const extra = [hasDisc ? `−${money(diff)} ${t('discount').toLowerCase()}` : '', hasRound ? `${roundDiff < 0 ? '−' : '+'}${money(Math.abs(roundDiff))} ${t('roundoff').toLowerCase()}` : ''].filter(Boolean).join(' · ');
-    $('sum').innerHTML = `<div>${t('sumLine', { p: money(principal), i: money(interest) })}</div><div>${periodText(start, end, days, false)}${extra ? ' · ' + extra : ''}</div>`;
+    const extra = [hasDisc ? `<span class="good">−${money(diff)} ${t('discount').toLowerCase()}</span>` : '', hasRound ? `${roundDiff < 0 ? '−' : '+'}${money(Math.abs(roundDiff))} ${t('roundoff').toLowerCase()}` : ''].filter(Boolean).join(' · ');
+    $('sum').innerHTML = `<div>${t('sumLine', { p: `<b>${money(principal)}</b>`, i: `<b class="gold">${money(interest)}</b>` })}</div><div>${periodText(start, end, days, false)}${extra ? ' · ' + extra : ''}</div>`;
     $('detailsBtn').hidden = false;
     $('bill').hidden = $('detailsBtn').getAttribute('aria-expanded') !== 'true';
 
     // Full bill (behind "Details")
     const perMonth = basis === 'monthly' ? principal * rate / 100 : principal * rate / 1200;
-    const line = (k, v) => `<div class="line"><span>${k}</span><strong>${v}</strong></div>`;
+    const line = (k, v, cls = '') => `<div class="line ${cls}"><span>${k}</span><strong>${v}</strong></div>`;
     $('bill').innerHTML =
       line(t('principal'), money(principal)) +
-      line(`${t('interest')} (${cfg.rate}% / ${t(basis === 'annual' ? 'yearShort' : 'monthShort')})`, money(interest)) +
+      line(`${t('interest')} (${cfg.rate}% / ${t(basis === 'annual' ? 'yearShort' : 'monthShort')})`, money(interest), 'gold') +
       line(t('perMonth'), money(perMonth)) +
       line(t('period'), periodText(start, end, days, true)) +
-      (hasDisc ? line(t('beforeDiscount'), money(subtotal)) + line(`${t('discount')} (${pct}%)`, '−' + money(diff)) : '') +
+      (hasDisc ? line(t('beforeDiscount'), money(subtotal)) + line(`${t('discount')} (${pct}%)`, '−' + money(diff), 'good') : '') +
       (hasRound ? line(t('beforeRound'), money(afterDisc)) + line(t('roundoff'), (roundDiff < 0 ? '−' : '+') + money(Math.abs(roundDiff))) : '') +
       `<p class="note">${t('note')}</p>`;
   };

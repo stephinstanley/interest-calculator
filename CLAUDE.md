@@ -18,7 +18,14 @@ Context: this is for a **gold finance** business. The interest rate and type (mo
 - No name field, subtitle, hint text or footer. The calculation note lives inside Details.
 - `[hidden]` is forced to `display:none !important`, because component `display` rules would otherwise override it.
 
-## Calculation
+## Visual identity: "Ink & Gold" (Sun, 15-Nov-2026; replaced the dark-green theme)
+Tokens are on `:root` in `index.html`; use them, don't hard-code colours.
+- **Ink** `#1A1814` is for structure, text, the answer card, primary buttons and selected states (an ink pill with gold text).
+- **Gold** is only for money and focus. `--gold-hi` `#F2D27E` is the total and interest on ink; `--gold-deep` `#85600F` is links, chips and ₹/% signs on light; `--gold` `#C9972B` is the focus ring and hairlines.
+- **Green** `--good` is money saved (discount). **Red** `--bad` is errors. The background is warm ivory `#F7F4EC` with white cards.
+- Text contrast passes WCAG AA (4.5:1) everywhere. The icon is a gold ₹ coin on ink (`icons/icon.svg`).
+
+
 Simple interest = Principal × Rate/100 × Period, using the saved setup. Default 1.5% per month (₹1.5 per ₹100 per month). Per month = days/30, per year = days/365. ("Once"/full term was removed: gold loans are monthly or yearly.)
 Discount panel: ₹ | % | Final amount (what they actually pay; the difference becomes the discount). A box under the input keeps "Total now", "After discount" and the difference (₹ and %) visible while typing.
 Round-off panel: ₹1 | ₹10 | ₹100 (default ₹10), done last. Skipped when Final amount is used.
