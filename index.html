@@ -85,9 +85,16 @@
     .affix span { position:absolute; top:50%; transform:translateY(-50%); color:var(--gold-deep); font-weight:800; pointer-events:none; }
     .affix.pre span { left:14px; } .affix.pre input { padding-left:34px; }
     .affix.suf span { right:14px; } .affix.suf input { padding-right:32px; }
-    .dmy { display:grid; grid-template-columns:54px 1fr 74px; gap:6px; }
-    .dmy select { padding:8px 20px 8px 8px; background-position:right 6px center; font-size:17px; }
-    .dmy select.bad { border-color:var(--bad); color:var(--bad); background-color:var(--bad-tint); }
+    .dinput { font-weight:700; font-size:21px; letter-spacing:1px; }
+    .dinput::placeholder { letter-spacing:1px; font-weight:500; }
+    .dinput.bad { border-color:var(--bad); background:var(--bad-tint); color:var(--bad); }
+    .dhint { display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:26px; margin-top:3px; font-size:15px; color:var(--text-2); }
+    .dhint.bad, .dhint .bad { color:var(--bad); font-weight:700; }
+    .dhint .link { min-height:28px; padding:2px 4px; }
+    .today-btn { width:100%; min-height:52px; display:flex; align-items:center; justify-content:space-between; gap:8px; border:1.5px solid var(--field); border-radius:var(--r-md); background:var(--surface-2); padding:8px 14px; font-size:17px; color:var(--ink); text-align:left; }
+    .today-btn > span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .today-btn b { font-weight:800; }
+    .today-btn svg { color:var(--gold-deep); flex:none; }
 
     /* Segmented switch: selected = ink pill */
     .seg { display:flex; background:var(--surface-2); border-radius:var(--r-md); padding:4px; gap:4px; min-height:50px; }
@@ -138,8 +145,7 @@
       .rows { padding:4px 12px; }
       .row { grid-template-columns:54px 1fr; gap:8px; }
       .row > .lbl { font-size:15px; }
-      .dmy { grid-template-columns:48px 1fr 68px; gap:5px; }
-      .dmy select { font-size:16px; padding:8px 18px 8px 7px; background-position:right 5px center; }
+      .today-btn { font-size:16px; padding:8px 12px; }
       .hero .total { font-size:38px; }
       h1 { font-size:17px; }
     }
@@ -184,17 +190,25 @@
         <div class="affix pre"><span>₹</span><input id="principal" type="number" inputmode="decimal" min="0" step="0.01" placeholder="50000"></div>
       </div>
 
-      <div class="row" id="start">
-        <div class="lbl" data-t="from">From</div>
-        <div class="dmy">
-          <select data-part="d"></select><select data-part="m"></select><select data-part="y"></select>
+      <div class="row">
+        <label class="lbl" for="fromInput" data-t="from">From</label>
+        <div>
+          <input id="fromInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY">
+          <div class="dhint" id="fromHint"></div>
         </div>
       </div>
 
-      <div class="row" id="end">
-        <div class="lbl"><span data-t="to">To</span><button type="button" class="link" data-today data-t="today">Today</button></div>
-        <div class="dmy">
-          <select data-part="d"></select><select data-part="m"></select><select data-part="y"></select>
+      <div class="row">
+        <label class="lbl" for="toInput" data-t="to">To</label>
+        <div>
+          <button type="button" class="today-btn" id="toToday">
+            <span><b data-t="today">Today</b> · <span id="todayText"></span></span>
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          </button>
+          <div id="toCustom" hidden>
+            <input id="toInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY">
+            <div class="dhint"><span id="toHint"></span><button type="button" class="link" id="backToday" data-t="useToday">Use today</button></div>
+          </div>
         </div>
       </div>
     </div>
@@ -255,7 +269,8 @@
     en: {
       title: 'Interest Calculator', totalToPay: 'Total to pay', details: 'Details', hideDetails: 'Hide details',
       amount: 'Amount', rate: 'Interest', monthly: 'Month', annual: 'Year', full: 'Once',
-      from: 'From', to: 'To', today: 'Today', day: 'Day', month: 'Month', year: 'Year',
+      from: 'From', to: 'To', today: 'Today', useToday: 'Use today', badDate: 'This date does not exist',
+      enterFrom: 'Type the From date (e.g. 29/12/2025)', enterTo: 'Type the To date',
       addDiscount: '+ Discount', addRound: '+ Round-off', discount: 'Discount', roundoff: 'Round-off',
       dFinal: 'Final amount', phDisc: { amount: 'Discount in ₹', percent: 'Discount in %', final: 'Amount they pay' },
       totalNow: 'Total now', afterDiscount: 'After discount', difference: 'Difference', overBy: 'Over the total by',
@@ -263,7 +278,7 @@
       sumLine: '{p} + {i} interest',
       principal: 'Principal', interest: 'Interest', perMonth: 'Interest per month', period: 'Period',
       beforeDiscount: 'Total before discount', beforeRound: 'Before round-off',
-      months: n => `${n} month${n === 1 ? '' : 's'}`, days: n => `${n} day${n === 1 ? '' : 's'}`,
+      years: n => `${n} year${n === 1 ? '' : 's'}`, months: n => `${n} month${n === 1 ? '' : 's'}`, days: n => `${n} day${n === 1 ? '' : 's'}`,
       note: 'Simple interest. Per month counts 30 days as a month; per year counts 365 days.',
       monthShort: 'month', yearShort: 'year', setupTitle: 'Interest setup', rateLabel: 'Interest rate',
       setupNote: 'Used for every calculation. Change it only when your rate changes.',
@@ -277,7 +292,8 @@
     ta: {
       title: 'வட்டி கணக்கீடு', totalToPay: 'செலுத்த வேண்டிய மொத்தம்', details: 'விவரங்கள்', hideDetails: 'விவரங்களை மறை',
       amount: 'தொகை', rate: 'வட்டி', monthly: 'மாதம்', annual: 'ஆண்டு', full: 'ஒருமுறை',
-      from: 'முதல்', to: 'வரை', today: 'இன்று', day: 'நாள்', month: 'மாதம்', year: 'ஆண்டு',
+      from: 'முதல்', to: 'வரை', today: 'இன்று', useToday: 'இன்றைய தேதி', badDate: 'இந்த தேதி இல்லை',
+      enterFrom: '"முதல்" தேதியை உள்ளிடுங்கள் (எ.கா. 29/12/2025)', enterTo: '"வரை" தேதியை உள்ளிடுங்கள்',
       addDiscount: '+ தள்ளுபடி', addRound: '+ ரவுண்ட் ஆஃப்', discount: 'தள்ளுபடி', roundoff: 'ரவுண்ட் ஆஃப்',
       dFinal: 'இறுதித் தொகை', phDisc: { amount: 'தள்ளுபடி ₹', percent: 'தள்ளுபடி %', final: 'அவர்கள் செலுத்தும் தொகை' },
       totalNow: 'இப்போதைய மொத்தம்', afterDiscount: 'தள்ளுபடிக்குப் பின்', difference: 'வித்தியாசம்', overBy: 'மொத்தத்தை விட அதிகம்',
@@ -285,7 +301,7 @@
       sumLine: '{p} + {i} வட்டி',
       principal: 'அசல்', interest: 'வட்டி', perMonth: 'மாத வட்டி', period: 'காலம்',
       beforeDiscount: 'தள்ளுபடிக்கு முன்', beforeRound: 'ரவுண்ட் ஆஃப் முன்',
-      months: n => `${n} மாதம்`, days: n => `${n} நாள்`,
+      years: n => `${n} ஆண்டு`, months: n => `${n} மாதம்`, days: n => `${n} நாள்`,
       note: 'தனி வட்டி. மாதத்திற்கு: 30 நாள் = ஒரு மாதம்; ஆண்டுக்கு: 365 நாள்.',
       monthShort: 'மாதம்', yearShort: 'ஆண்டு', setupTitle: 'வட்டி அமைப்பு', rateLabel: 'வட்டி விகிதம்',
       setupNote: 'ஒவ்வொரு கணக்கிற்கும் இது பயன்படும். வட்டி மாறினால் மட்டும் மாற்றவும்.',
@@ -299,7 +315,8 @@
     ml: {
       title: 'പലിശ കണക്കുകൂട്ടൽ', totalToPay: 'നൽകേണ്ട ആകെ തുക', details: 'വിശദാംശങ്ങൾ', hideDetails: 'വിശദാംശങ്ങൾ മറയ്ക്കുക',
       amount: 'തുക', rate: 'പലിശ', monthly: 'മാസം', annual: 'വർഷം', full: 'ഒരിക്കൽ',
-      from: 'മുതൽ', to: 'വരെ', today: 'ഇന്ന്', day: 'ദിവസം', month: 'മാസം', year: 'വർഷം',
+      from: 'മുതൽ', to: 'വരെ', today: 'ഇന്ന്', useToday: 'ഇന്നത്തെ തീയതി', badDate: 'ഈ തീയതി നിലവിലില്ല',
+      enterFrom: '"മുതൽ" തീയതി നൽകുക (ഉദാ. 29/12/2025)', enterTo: '"വരെ" തീയതി നൽകുക',
       addDiscount: '+ ഇളവ്', addRound: '+ റൗണ്ട് ഓഫ്', discount: 'ഇളവ്', roundoff: 'റൗണ്ട് ഓഫ്',
       dFinal: 'അവസാന തുക', phDisc: { amount: 'ഇളവ് ₹', percent: 'ഇളവ് %', final: 'അവർ നൽകുന്ന തുക' },
       totalNow: 'ഇപ്പോഴത്തെ ആകെ', afterDiscount: 'ഇളവിന് ശേഷം', difference: 'വ്യത്യാസം', overBy: 'ആകെയേക്കാൾ കൂടുതൽ',
@@ -307,7 +324,7 @@
       sumLine: '{p} + {i} പലിശ',
       principal: 'മുതൽ', interest: 'പലിശ', perMonth: 'മാസ പലിശ', period: 'കാലയളവ്',
       beforeDiscount: 'ഇളവിന് മുമ്പ്', beforeRound: 'റൗണ്ട് ഓഫിന് മുമ്പ്',
-      months: n => `${n} മാസം`, days: n => `${n} ദിവസം`,
+      years: n => `${n} വർഷം`, months: n => `${n} മാസം`, days: n => `${n} ദിവസം`,
       note: 'സാധാരണ പലിശ. മാസത്തിന്: 30 ദിവസം = ഒരു മാസം; വർഷത്തിന്: 365 ദിവസം.',
       monthShort: 'മാസം', yearShort: 'വർഷം', setupTitle: 'പലിശ ക്രമീകരണം', rateLabel: 'പലിശ നിരക്ക്',
       setupNote: 'എല്ലാ കണക്കിനും ഇത് ഉപയോഗിക്കും. നിരക്ക് മാറിയാൽ മാത്രം മാറ്റുക.',
@@ -354,30 +371,68 @@
     showCfg(); calc();
   });
 
-  // ---------- Dates: day / month / year dropdowns ----------
+  // ---------- Dates: typed on the number pad, like the pledge receipt ----------
+  // "29122025" → 29/12/2025; "291225" → 29/12/2025 (2-digit year). Slashes are added automatically.
   const pad = n => String(n).padStart(2, '0');
-  const thisYear = new Date().getFullYear();
-  const opt = (value, text) => { const o = document.createElement('option'); o.value = value; o.textContent = text; return o; };
-  const part = (box, p) => box.querySelector(`[data-part="${p}"]`);
   const monthName = i => new Intl.DateTimeFormat(LOCALES[lang], { month: 'short' }).format(new Date(2000, i, 1)).replace(/\.$/, '');
-  const readDate = box => {
-    const d = +part(box, 'd').value, m = +part(box, 'm').value, y = +part(box, 'y').value;
-    const dt = new Date(y, m - 1, d);
-    return dt.getMonth() === m - 1 ? dt : null; // null for 31-Feb etc.
+  const weekdayName = dt => new Intl.DateTimeFormat(LOCALES[lang], { weekday: 'short' }).format(dt).replace(/\.$/, '');
+  const fmtDate = dt => `${weekdayName(dt)}, ${pad(dt.getDate())}-${monthName(dt.getMonth())}-${dt.getFullYear()}`;
+  const toTyped = dt => `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}/${dt.getFullYear()}`;
+  const todayDate = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
+  const formatDigits = d => d.length <= 2 ? d : d.length <= 4 ? `${d.slice(0, 2)}/${d.slice(2)}` : `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
+  // Returns a Date, 'partial' (still typing / empty) or 'bad' (impossible date).
+  const parseTyped = (value, allowShortYear) => {
+    const d = value.replace(/\D/g, '');
+    if (d.length !== 8 && !(d.length === 6 && allowShortYear)) return 'partial';
+    const day = +d.slice(0, 2), mon = +d.slice(2, 4);
+    let year = +d.slice(4);
+    if (d.length === 6) year += (2000 + year > new Date().getFullYear() + 1) ? 1900 : 2000;
+    const dt = new Date(year, mon - 1, day);
+    return (mon >= 1 && mon <= 12 && dt.getMonth() === mon - 1 && dt.getDate() === day && year >= 1900) ? dt : 'bad';
   };
-  const setDate = (box, dt) => {
-    part(box, 'd').value = dt.getDate();
-    part(box, 'm').value = dt.getMonth() + 1;
-    part(box, 'y').value = dt.getFullYear();
+  const maskInput = input => input.addEventListener('input', () => {
+    const caretDigits = input.value.slice(0, input.selectionStart ?? input.value.length).replace(/\D/g, '').length;
+    const digits = input.value.replace(/\D/g, '').slice(0, 8);
+    input.value = formatDigits(digits);
+    let pos = 0, seen = 0;                       // put the caret back after the same digit
+    while (pos < input.value.length && seen < caretDigits) { if (/\d/.test(input.value[pos])) seen++; pos++; }
+    try { input.setSelectionRange(pos, pos); } catch (e) {}
+  });
+  maskInput($('fromInput'));
+  maskInput($('toInput'));
+  // Leaving the box: a 2-digit year (29/12/25) becomes 29/12/2025.
+  for (const id of ['fromInput', 'toInput']) $(id).addEventListener('blur', () => {
+    const v = parseTyped($(id).value, true);
+    if (v instanceof Date) $(id).value = toTyped(v);
+    calc();
+  });
+
+  let toIsToday = true;
+  const showToday = () => { const d = todayDate(); $('todayText').textContent = `${pad(d.getDate())}-${monthName(d.getMonth())}-${d.getFullYear()}`; };
+  const setToMode = today => {
+    toIsToday = today;
+    $('toToday').hidden = today === false;
+    $('toCustom').hidden = today;
   };
-  const dateBoxes = [$('start'), $('end')];
-  for (const box of dateBoxes) {
-    for (let d = 1; d <= 31; d++) part(box, 'd').append(opt(d, pad(d)));
-    for (let m = 1; m <= 12; m++) part(box, 'm').append(opt(m, ''));
-    for (let y = thisYear + 1; y >= 1990; y--) part(box, 'y').append(opt(y, y));
-    setDate(box, new Date());
-  }
-  $('end').querySelector('[data-today]').addEventListener('click', () => { setDate($('end'), new Date()); calc(); });
+  $('toToday').addEventListener('click', () => {
+    setToMode(false);
+    $('toInput').value = toTyped(todayDate());
+    $('toInput').focus(); $('toInput').select();
+    calc();
+  });
+  $('backToday').addEventListener('click', () => { setToMode(true); calc(); });
+
+  // Shows the typed date in words under the box, or a red note if it can't exist.
+  const showHint = (input, hintEl) => {
+    const v = parseTyped(input.value, document.activeElement !== input);
+    const full = input.value.replace(/\D/g, '').length === 8;
+    input.classList.toggle('bad', v === 'bad' || (v === 'partial' && input.value.replace(/\D/g, '').length > 8));
+    hintEl.classList.toggle('bad', v === 'bad');
+    hintEl.textContent = v instanceof Date ? fmtDate(v) : v === 'bad' && full ? t('badDate') : '';
+    return v;
+  };
+  const readFrom = () => showHint($('fromInput'), $('fromHint'));
+  const readTo = () => toIsToday ? todayDate() : showHint($('toInput'), $('toHint'));
 
   // Whole calendar months, then leftover days. 31-Jan → 28-Feb = 1 month.
   const monthsAndDays = (start, end) => {
@@ -391,7 +446,8 @@
   };
   const periodText = (start, end, totalDays, withDays) => {
     const md = monthsAndDays(start, end);
-    const txt = [md.months ? L().months(md.months) : '', md.days || !md.months ? L().days(md.days) : ''].filter(Boolean).join(' ');
+    const y = Math.floor(md.months / 12), m = md.months % 12;
+    const txt = [y ? L().years(y) : '', m ? L().months(m) : '', md.days || !md.months ? L().days(md.days) : ''].filter(Boolean).join(' ');
     return withDays && md.months ? `${txt} (${L().days(totalDays)})` : txt;
   };
 
@@ -412,7 +468,6 @@
   const calc = () => {
     const dtype = radio('dtype');
     $('discount').placeholder = L().phDisc[dtype];
-    for (const box of dateBoxes) part(box, 'd').classList.toggle('bad', !readDate(box));
 
     const fail = msg => {
       $('err').textContent = msg; $('err').hidden = false;
@@ -420,12 +475,15 @@
       $('total').textContent = '₹0'; $('total').classList.add('empty');
     };
     $('err').hidden = true;
+    readFrom(); if (!toIsToday) readTo();
     if ($('principal').value === '') {
       fail(''); $('err').hidden = true; $('sum').textContent = t('enterAmount'); return;
     }
     const principal = Number($('principal').value), rate = cfg.rate;
-    const start = readDate($('start')), end = readDate($('end'));
-    if (!start || !end) return fail(t('errDate'));
+    const start = readFrom(), end = readTo();
+    if (start === 'partial') { fail(''); $('err').hidden = true; $('sum').textContent = t('enterFrom'); return; }
+    if (end === 'partial') { fail(''); $('err').hidden = true; $('sum').textContent = t('enterTo'); return; }
+    if (start === 'bad' || end === 'bad') return fail(t('errDate'));
     if (!(principal >= 0) || !(rate >= 0)) return fail(t('errAmounts'));
     if (end < start) return fail(t('errOrder'));
 
@@ -489,13 +547,7 @@
     document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
     showCfg();
     if ($('detailsBtn').getAttribute('aria-expanded') === 'true') $('detailsBtn').firstElementChild.textContent = t('hideDetails');
-    for (const box of dateBoxes) {
-      const name = t(box.id === 'start' ? 'from' : 'to');
-      part(box, 'd').setAttribute('aria-label', `${name}: ${t('day')}`);
-      part(box, 'm').setAttribute('aria-label', `${name}: ${t('month')}`);
-      part(box, 'y').setAttribute('aria-label', `${name}: ${t('year')}`);
-      [...part(box, 'm').options].forEach((o, i) => { o.textContent = `${pad(i + 1)} · ${monthName(i)}`; });
-    }
+    showToday();
     calc();
   };
   document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => {
@@ -509,7 +561,7 @@
     $('principal').value = ''; $('discount').value = '';
     setRadio('dtype', 'amount'); setRadio('round', '10');
     showPanel('discountPanel', 'addDiscount', false); showPanel('roundPanel', 'addRound', false);
-    dateBoxes.forEach(box => setDate(box, new Date()));
+    $('fromInput').value = ''; $('toInput').value = ''; setToMode(true);
     calc();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });

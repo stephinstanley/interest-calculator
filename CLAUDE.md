@@ -31,13 +31,19 @@ Discount panel: ₹ | % | Final amount (what they actually pay; the difference b
 Round-off panel: ₹1 | ₹10 | ₹100 (default ₹10), done last. Skipped when Final amount is used.
 Details shows: principal, interest, interest per month, period as months + days (total days), before discount / discount (%), before round-off / round-off.
 Money shows no paise when whole (₹57,530), otherwise 2 decimals. Calculation is live; there is no Calculate button.
-Period months are calendar months (display only); per-month interest still uses days/30. Still waiting on the father: does he count by calendar months?
+Period years/months are calendar-based (display only); per-month interest still uses days/30. Still waiting on the father: does he count by calendar months?
 
 ## Languages
 English, Tamil, Malayalam (EN | த | മ at the top right; choice saved in localStorage). All text lives in the `I18N` object in `index.html`, and elements use `data-t`. Month names come from `Intl.DateTimeFormat` (en-IN / ta-IN / ml-IN). Translations were written by Claude, so have a native speaker check them. Keep words short; long labels overflow on narrow phones.
 
 ## Dates
-Day / Month / Year dropdowns, not native `type=date` (Stephin found the native picker hard, especially picking the year). Month shows number and name (`12 · Dec`) because their records are written like 29/12/2025. An impossible date (31 Feb) turns the day box red and shows an error. Years 1990 to next year.
+Typed on the number pad, the way the pledge receipt shows it (`DD/MM/YYYY`). It replaced the native picker and then the day/month/year dropdowns; Stephin found both annoying.
+- Slashes are added automatically (`29122025` → `29/12/2025`), and the caret is kept in place on edits/backspace.
+- A 2-digit year (`291225`) is accepted only when leaving the box, then expanded to `29/12/2025`, so typing "2025" doesn't flash 2020 at "20".
+- Under the box: the date in words (`Mon, 29-Dec-2025`), or red "This date does not exist" for 31/02.
+- **To** defaults to a "Today · 15-Nov-2026 ✎" button; tapping it opens the same typed box (prefilled with today) plus a "Use today" link.
+- Until From is complete, the answer panel says "Type the From date".
+- The period shows years, months and days (`2 years 6 months 5 days`); Details also shows total days.
 
 ## Run locally
 `python3 -m http.server 8765`, then open http://localhost:8765 (service workers work on localhost). Test with agent-browser.
