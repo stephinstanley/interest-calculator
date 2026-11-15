@@ -398,6 +398,7 @@
 
   // Up to 4 decimals, for per-day interest, so "days × per day" can be checked on a calculator.
   const moneyFine = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(n);
+  const num = n => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(n);
   const money = n => {
     const r = Math.round(n * 100) / 100;
     const whole = Math.abs(r % 1) < 0.005;
@@ -599,9 +600,10 @@
       line(t('perMonth'), money(perMonth)) +
       line(t('perDay'), moneyFine(perDay)) +
       line(t('period'), periodText(start, end, days, true)) +
+      // Bank formula, exact on any calculator: P × yearly% × days ÷ 36,500 (or P × monthly% × days ÷ 3,000 for 30-day months).
       `<div class="line work"><small>${t('working')}</small>${cfg.method === 'daily'
-        ? `${L().days(days)} × ${moneyFine(perDay)} = ${money(interest)}`
-        : `${days} ÷ 30 = ${L().months(+(days / 30).toFixed(2))} × ${money(perMonth)} = ${money(interest)}`}</div>` +
+        ? `${num(principal)} × ${+yearly.toFixed(4)} × ${days} ÷ 36,500 = ${money(interest)}`
+        : `${num(principal)} × ${+monthly.toFixed(4)} × ${days} ÷ 3,000 = ${money(interest)}`}</div>` +
       (hasDisc ? line(t('beforeDiscount'), money(subtotal)) + line(`${t('discount')} (${pct}%)`, '−' + money(diff), 'good') : '') +
       (hasRound ? line(t('beforeRound'), money(afterDisc)) + line(t('roundoff'), (roundDiff < 0 ? '−' : '+') + money(Math.abs(roundDiff))) : '') +
       `<p class="note">${t('simple')} ${t({ daily: 'mDailySub', m30: 'm30Sub' }[cfg.method])}</p>`;
