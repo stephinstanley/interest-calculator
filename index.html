@@ -105,6 +105,12 @@
     .affix.suf span { right:14px; } .affix.suf input { padding-right:32px; }
     .dinput { font-weight:700; font-size:21px; letter-spacing:1px; }
     .dinput::placeholder { letter-spacing:1px; font-weight:500; }
+    /* Calendar button: a see-through native date input over the icon, so a tap opens the phone's own picker. Typing still works. */
+    .dwrap { position:relative; }
+    .dwrap .dinput { padding-right:56px; }
+    .dcal { position:absolute; right:4px; top:50%; transform:translateY(-50%); width:48px; height:44px; display:grid; place-items:center; color:var(--gold-deep); border-left:1px solid var(--field); }
+    .dpick { position:absolute; inset:0; width:100%; height:100%; min-height:0; opacity:0; padding:0; border:0; cursor:pointer; }
+    .dpick::-webkit-calendar-picker-indicator { position:absolute; inset:0; width:100%; height:100%; cursor:pointer; }
     .dinput.bad { border-color:var(--bad); background:var(--bad-tint); color:var(--bad); }
     .dhint { display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:26px; margin-top:3px; font-size:15px; color:var(--text-2); }
     .dhint.bad, .dhint .bad { color:var(--bad); font-weight:700; }
@@ -152,6 +158,12 @@
     .sheet-note { margin:0 0 14px; color:var(--text-2); font-size:15px; }
     .sheet-lbl { display:block; font-weight:700; font-size:16px; margin:0 0 6px; color:var(--text-2); }
     .sheet .affix { margin-bottom:10px; }
+    .tier-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    .tier-row label { flex:1; min-width:0; font-weight:700; font-size:16px; }
+    .tier-row .affix { width:120px; flex:none; margin:0; }
+    .tier-rules { margin:2px 0 0; padding:8px 10px; background:var(--gold-tint); border-radius:var(--r-sm); font-size:14px; color:var(--text-2); line-height:1.4; }
+    .tier-rules div + div { margin-top:4px; }
+    .bill .work .step.note { font-size:14px; color:var(--ink); font-weight:600; margin-bottom:4px; }
     .sheet #cfgRate { font-weight:700; font-size:22px; }
     .methods { display:grid; gap:6px; }
     .method { position:relative; display:block; }
@@ -238,7 +250,7 @@
       <div class="row">
         <label class="lbl" for="fromInput" data-t="from">From</label>
         <div>
-          <input id="fromInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY">
+          <div class="dwrap"><input id="fromInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY"><span class="dcal"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input type="date" class="dpick" tabindex="-1" aria-label="Calendar" data-for="fromInput"></span></div>
           <div class="dhint" id="fromHint"></div>
         </div>
       </div>
@@ -251,7 +263,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>
           </button>
           <div id="toCustom" hidden>
-            <input id="toInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY">
+            <div class="dwrap"><input id="toInput" class="dinput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="DD/MM/YYYY"><span class="dcal"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input type="date" class="dpick" tabindex="-1" aria-label="Calendar" data-for="toInput"></span></div>
             <div class="dhint"><span id="toHint"></span><button type="button" class="link" id="backToday" data-t="useToday">Use today</button></div>
           </div>
         </div>
@@ -289,8 +301,20 @@
     <div class="grab" aria-hidden="true"></div>
     <h2 id="setupTitle" data-t="setupTitle" tabindex="-1">Interest setup</h2>
     <p class="sheet-note" data-t="setupNote">Used for every calculation. Change it only when your rate changes.</p>
+    <div class="sheet-lbl" data-t="modeLabel">Interest type</div>
+    <div class="seg" role="radiogroup" aria-label="Interest type" style="margin-bottom:14px">
+      <label><input type="radio" name="cfgMode" value="tiered"><span data-t="modeTier">By duration</span></label>
+      <label><input type="radio" name="cfgMode" value="fixed"><span data-t="modeFixed">Fixed</span></label>
+    </div>
+    <div id="tierBox">
+      <div class="tier-row"><label for="cfgR1" data-t="tierUpTo90">Up to 90 days</label><div class="affix suf"><input id="cfgR1" type="number" inputmode="decimal" min="0" step="0.01"><span>%</span></div></div>
+      <div class="tier-row"><label for="cfgR2" data-t="tierAfter90">After 90 days</label><div class="affix suf"><input id="cfgR2" type="number" inputmode="decimal" min="0" step="0.01"><span>%</span></div></div>
+      <div class="tier-row"><label for="cfgR3" data-t="tierAfter365">After 365 days</label><div class="affix suf"><input id="cfgR3" type="number" inputmode="decimal" min="0" step="0.01"><span>%</span></div></div>
+      <div class="tier-rules" id="tierRules"></div>
+    </div>
+    <div id="fixedBox">
     <label class="sheet-lbl" for="cfgRate" data-t="rateLabel">Interest rate</label>
-    <div class="affix suf"><input id="cfgRate" type="number" inputmode="decimal" min="0" step="0.01" required><span>%</span></div>
+    <div class="affix suf"><input id="cfgRate" type="number" inputmode="decimal" min="0" step="0.01"><span>%</span></div>
     <div class="seg" role="radiogroup" aria-label="Rate period">
       <label><input type="radio" name="cfgBasis" value="monthly"><span data-t="perMonthLong">Per month</span></label>
       <label><input type="radio" name="cfgBasis" value="annual"><span data-t="perYearLong">Per year</span></label>
@@ -299,6 +323,7 @@
     <div class="methods" role="radiogroup">
       <label class="method"><input type="radio" name="cfgMethod" value="daily" disabled><span><b data-t="mDaily">Exact days</b><small data-t="mDailySub"></small></span></label>
       <label class="method"><input type="radio" name="cfgMethod" value="m30"><span><b data-t="m30">30-day months</b><small data-t="m30Sub"></small></span></label>
+    </div>
     </div>
     <div class="sheet-lbl" style="margin-top:16px" data-t="roundoff">Round-off</div>
     <label class="switch-row"><span><b data-t="roundSetting">Round off to nearest ₹1</b><small data-t="roundSettingSub"></small></span><input type="checkbox" id="cfgRound" role="switch"><i aria-hidden="true"></i></label>
@@ -335,6 +360,9 @@
       why36500: '36,500 = 100 (for %) × 365 days in a year', why3000: '3,000 = 100 (for %) × 30 days in a month', working: 'How it was worked out', method: 'How interest is counted', perDay: 'Interest per day',
       mDaily: 'Exact days (like banks)', mDailySub: 'Every day counts: yearly rate ÷ 365 per day.',
       m30: '30-day months', m30Sub: 'Total days ÷ 30 = months.',
+      modeLabel: 'Interest type', modeTier: 'By duration', modeFixed: 'Fixed', tierUpTo90: 'Up to 90 days', tierAfter90: 'After 90 days', tierAfter365: 'After 365 days',
+      tierRule1: '91–180 days: first 90 days at {a}, the rest at {b}.', tierRule2: 'Over 180 days: all days at {b}.', tierRule3: 'Over 365 days: all days at {c}.', tierRule0: 'Rates are per month. 1 month = 30 days.',
+      tierAll90: 'Up to 90 days, so all days are at {a}.', tierSplit: 'First 90 days at {a}, the other {d} days at {b}.', tierAll180: 'Over 180 days, so all {d} days are at {b}. The {a} for the first 90 days does not apply.', tierAll365: 'Over 365 days, so all {d} days are at {c}.',
       monthShort: 'month', yearShort: 'year', setupTitle: 'Interest setup', rateLabel: 'Interest rate',
       setupNote: 'Used for every calculation. Change it only when your rate changes.',
       perMonthLong: 'Per month', perYearLong: 'Per year', save: 'Save', cancel: 'Cancel',
@@ -363,6 +391,9 @@
       why36500: '36,500 = 100 (% க்கு) × ஆண்டின் 365 நாட்கள்', why3000: '3,000 = 100 (% க்கு) × மாதத்தின் 30 நாட்கள்', working: 'கணக்கிட்ட விதம்', method: 'வட்டி கணக்கிடும் முறை', perDay: 'நாள் வட்டி',
       mDaily: 'சரியான நாட்கள் (வங்கிகள் போல)', mDailySub: 'ஒவ்வொரு நாளும் கணக்கு: ஆண்டு வட்டி ÷ 365 ஒரு நாளுக்கு.',
       m30: '30 நாள் மாதம்', m30Sub: 'மொத்த நாட்கள் ÷ 30 = மாதங்கள்.',
+      modeLabel: 'வட்டி வகை', modeTier: 'காலத்தைப் பொறுத்து', modeFixed: 'நிலையான', tierUpTo90: '90 நாட்கள் வரை', tierAfter90: '90 நாட்களுக்குப் பின்', tierAfter365: '365 நாட்களுக்குப் பின்',
+      tierRule1: '91–180 நாட்கள்: முதல் 90 நாட்கள் {a}, மீதி {b}.', tierRule2: '180 நாட்களுக்கு மேல்: எல்லா நாட்களும் {b}.', tierRule3: '365 நாட்களுக்கு மேல்: எல்லா நாட்களும் {c}.', tierRule0: 'வட்டி மாதத்திற்கு. 1 மாதம் = 30 நாட்கள்.',
+      tierAll90: '90 நாட்கள் வரை, அதனால் எல்லா நாட்களும் {a}.', tierSplit: 'முதல் 90 நாட்கள் {a}, மீதி {d} நாட்கள் {b}.', tierAll180: '180 நாட்களுக்கு மேல், அதனால் எல்லா {d} நாட்களும் {b}. முதல் 90 நாட்களுக்கான {a} பொருந்தாது.', tierAll365: '365 நாட்களுக்கு மேல், அதனால் எல்லா {d} நாட்களும் {c}.',
       monthShort: 'மாதம்', yearShort: 'ஆண்டு', setupTitle: 'வட்டி அமைப்பு', rateLabel: 'வட்டி விகிதம்',
       setupNote: 'ஒவ்வொரு கணக்கிற்கும் இது பயன்படும். வட்டி மாறினால் மட்டும் மாற்றவும்.',
       perMonthLong: 'மாதத்திற்கு', perYearLong: 'ஆண்டுக்கு', save: 'சேமி', cancel: 'ரத்து',
@@ -391,6 +422,9 @@
       why36500: '36,500 = 100 (% ന്) × വർഷത്തിലെ 365 ദിവസം', why3000: '3,000 = 100 (% ന്) × മാസത്തിലെ 30 ദിവസം', working: 'കണക്കാക്കിയ വിധം', method: 'പലിശ കണക്കാക്കുന്ന രീതി', perDay: 'ദിവസ പലിശ',
       mDaily: 'കൃത്യമായ ദിവസങ്ങൾ (ബാങ്കുകളെ പോലെ)', mDailySub: 'ഓരോ ദിവസവും കണക്കാക്കും: വാർഷിക പലിശ ÷ 365 ഒരു ദിവസത്തിന്.',
       m30: '30 ദിവസ മാസം', m30Sub: 'ആകെ ദിവസം ÷ 30 = മാസം.',
+      modeLabel: 'പലിശ തരം', modeTier: 'കാലാവധി പ്രകാരം', modeFixed: 'സ്ഥിരം', tierUpTo90: '90 ദിവസം വരെ', tierAfter90: '90 ദിവസത്തിന് ശേഷം', tierAfter365: '365 ദിവസത്തിന് ശേഷം',
+      tierRule1: '91–180 ദിവസം: ആദ്യ 90 ദിവസം {a}, ബാക്കി {b}.', tierRule2: '180 ദിവസം കഴിഞ്ഞാൽ: എല്ലാ ദിവസവും {b}.', tierRule3: '365 ദിവസം കഴിഞ്ഞാൽ: എല്ലാ ദിവസവും {c}.', tierRule0: 'നിരക്ക് മാസത്തിന്. 1 മാസം = 30 ദിവസം.',
+      tierAll90: '90 ദിവസം വരെ, അതിനാൽ എല്ലാ ദിവസവും {a}.', tierSplit: 'ആദ്യ 90 ദിവസം {a}, ബാക്കി {d} ദിവസം {b}.', tierAll180: '180 ദിവസം കഴിഞ്ഞു, അതിനാൽ എല്ലാ {d} ദിവസവും {b}. ആദ്യ 90 ദിവസത്തെ {a} ബാധകമല്ല.', tierAll365: '365 ദിവസം കഴിഞ്ഞു, അതിനാൽ എല്ലാ {d} ദിവസവും {c}.',
       monthShort: 'മാസം', yearShort: 'വർഷം', setupTitle: 'പലിശ ക്രമീകരണം', rateLabel: 'പലിശ നിരക്ക്',
       setupNote: 'എല്ലാ കണക്കിനും ഇത് ഉപയോഗിക്കും. നിരക്ക് മാറിയാൽ മാത്രം മാറ്റുക.',
       perMonthLong: 'മാസത്തിന്', perYearLong: 'വർഷത്തിന്', save: 'സേവ് ചെയ്യുക', cancel: 'റദ്ദാക്കുക',
@@ -446,15 +480,35 @@
   // method: 'daily' = exact days like banks (yearly rate ÷ 365 per day), 'm30' = total days ÷ 30.
   // Only 30-day months is in use (1 month = 30 days, 1 year = 360 days). Exact days stays in the code but is switched off.
   const METHODS = ['m30'];
-  let cfg = { rate: 1.5, basis: 'monthly', method: 'm30', round: true };  // round: nearest ₹1, like banks
+  // mode: 'tiered' = By duration (r1/r2/r3, monthly %, 30-day), 'fixed' = one rate. Old settings without mode get 'tiered'.
+  let cfg = { mode: 'tiered', r1: 1, r2: 1.5, r3: 2, rate: 1.5, basis: 'monthly', method: 'm30', round: true };  // round: nearest ₹1, like banks
   try {
     const saved = JSON.parse(localStorage.getItem('interestCfg') || 'null');
     if (saved && saved.rate >= 0 && (saved.basis === 'monthly' || saved.basis === 'annual')) cfg = { ...cfg, ...saved };
     if (!METHODS.includes(cfg.method)) cfg.method = 'm30';   // old saved 'daily' moves to 30-day
+    if (!['tiered', 'fixed'].includes(cfg.mode)) cfg.mode = 'tiered';
+    for (const [k, v] of [['r1', 1], ['r2', 1.5], ['r3', 2]]) if (!(Number(cfg[k]) >= 0) || cfg[k] === '' || cfg[k] == null) cfg[k] = v;
   } catch (e) {}
-  const showCfg = () => { $('rateChipText').textContent = `${cfg.rate}% / ${t(cfg.basis === 'annual' ? 'yearShort' : 'monthShort')}`; };
+  const pc = r => `${+r}%`;
+  const tierVars = c => ({ a: pc(c.r1), b: pc(c.r2), c: pc(c.r3) });
+  const showCfg = () => {
+    $('rateChipText').textContent = cfg.mode === 'tiered'
+      ? `${pc(cfg.r1)} → ${pc(cfg.r3)} / ${t('monthShort')}`
+      : `${cfg.rate}% / ${t(cfg.basis === 'annual' ? 'yearShort' : 'monthShort')}`;
+  };
+  const sheetMode = () => document.querySelector('input[name="cfgMode"]:checked').value;
+  const showTierRules = () => {
+    const v = { a: pc($('cfgR1').value || 0), b: pc($('cfgR2').value || 0), c: pc($('cfgR3').value || 0) };
+    $('tierRules').innerHTML = ['tierRule1', 'tierRule2', 'tierRule3', 'tierRule0'].map(k => `<div>${t(k, v)}</div>`).join('');
+  };
+  const showMode = () => { const m = sheetMode(); $('tierBox').hidden = m !== 'tiered'; $('fixedBox').hidden = m !== 'fixed'; showTierRules(); };
+  document.querySelectorAll('input[name="cfgMode"]').forEach(r => r.addEventListener('change', showMode));
+  ['cfgR1', 'cfgR2', 'cfgR3'].forEach(id => $(id).addEventListener('input', showTierRules));
   $('rateChip').addEventListener('click', () => {
     $('cfgRate').value = cfg.rate;
+    $('cfgR1').value = cfg.r1; $('cfgR2').value = cfg.r2; $('cfgR3').value = cfg.r3;
+    document.querySelector(`input[name="cfgMode"][value="${cfg.mode}"]`).checked = true;
+    showMode();
     document.querySelector(`input[name="cfgBasis"][value="${cfg.basis}"]`).checked = true;
     document.querySelector(`input[name="cfgMethod"][value="${cfg.method}"]`).checked = true;
     $('cfgRound').checked = cfg.round !== false;
@@ -464,9 +518,11 @@
   $('setupCancel').addEventListener('click', () => $('setup').close());
   $('setup').addEventListener('click', e => { if (e.target === $('setup')) $('setup').close(); }); // tap outside
   $('setupForm').addEventListener('submit', () => {
-    const rate = Number($('cfgRate').value);
-    if (!($('cfgRate').value !== '' && rate >= 0)) return;
-    cfg = { rate, basis: document.querySelector('input[name="cfgBasis"]:checked').value, method: document.querySelector('input[name="cfgMethod"]:checked').value, round: $('cfgRound').checked };
+    const ok = id => $(id).value !== '' && Number($(id).value) >= 0;
+    const mode = sheetMode();
+    if (mode === 'fixed' ? !ok('cfgRate') : !['cfgR1', 'cfgR2', 'cfgR3'].every(ok)) return;
+    const keep = id => ok(id) ? Number($(id).value) : undefined;
+    cfg = { mode, r1: keep('cfgR1') ?? cfg.r1, r2: keep('cfgR2') ?? cfg.r2, r3: keep('cfgR3') ?? cfg.r3, rate: keep('cfgRate') ?? cfg.rate, basis: document.querySelector('input[name="cfgBasis"]:checked').value, method: document.querySelector('input[name="cfgMethod"]:checked').value, round: $('cfgRound').checked };
     try { localStorage.setItem('interestCfg', JSON.stringify(cfg)); } catch (e) {}
     showCfg(); calc();
   });
@@ -531,6 +587,24 @@
     hintEl.textContent = v instanceof Date ? fmtDate(v) : v === 'bad' && full ? t('badDate') : '';
     return v;
   };
+  // Calendar: start the picker on the typed date (or today); a picked date is written into the text box as DD/MM/YYYY.
+  document.querySelectorAll('.dpick').forEach(pick => {
+    const box = $(pick.dataset.for);
+    const sync = () => {
+      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(box.value);
+      const d = todayDate();
+      pick.value = m ? `${m[3]}-${m[2]}-${m[1]}` : `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    };
+    pick.addEventListener('pointerdown', sync);
+    pick.addEventListener('click', () => { sync(); try { pick.showPicker(); } catch (e) {} });
+    pick.addEventListener('change', () => {
+      if (!pick.value) return;
+      const [y, mo, d] = pick.value.split('-');
+      box.value = `${d}/${mo}/${y}`;
+      box.dispatchEvent(new Event('input', { bubbles: true }));
+      box.dispatchEvent(new Event('blur'));
+    });
+  });
   const readFrom = () => showHint($('fromInput'), $('fromHint'));
   const readTo = () => toIsToday ? todayDate() : showHint($('toInput'), $('toHint'));
 
@@ -570,14 +644,26 @@
     return BigInt(i || '0') * 10n ** BigInt(dec) + BigInt((f + '0'.repeat(dec)).slice(0, dec) || '0');
   };
   const divRound = (num, den) => (2n * num + den) / (2n * den);   // half-up, num ≥ 0
+  // "By duration" rates (monthly %, 30-day months). r1 up to 90 days; 91–180 days: first 90 days at r1, the rest at r2;
+  // 181–365 days: all days at r2 (the r1 concession is taken back); over 365 days: all days at r3.
+  const tierSegments = (days, { r1, r2, r3 }) =>
+    days <= 90 ? [[days, r1]] : days <= 180 ? [[90, r1], [days - 90, r2]] : days <= 365 ? [[days, r2]] : [[days, r3]];
   // Returns amounts in paise (BigInt). rate is % per month or per year (basis); method 'daily' or 'm30'.
-  const computePaise = ({ principal, rate, basis, method, days, dtype, discount, roundOn }) => {
-    const P = toScaled(principal, 2), R = toScaled(rate, 6), D = BigInt(days);
+  // With tiers, each part is rounded to paise and interest is their sum, so the bill lines add up exactly.
+  const computePaise = ({ principal, rate, basis, method, days, dtype, discount, roundOn, tiers }) => {
+    const P = toScaled(principal, 2), D = BigInt(days);
     const toYear = basis === 'annual' ? 1n : 12n;          // monthly rate × 12 = yearly
     const perMonthDiv = basis === 'annual' ? 12n : 1n;     // yearly rate ÷ 12 = monthly
-    const interest = method === 'daily'
-      ? divRound(P * R * toYear * D, 100n * 365n * 1000000n)               // P × yearly% × days ÷ 36,500
-      : divRound(P * R * D, 100n * 30n * 1000000n * perMonthDiv);          // P × monthly% × days ÷ 3,000
+    let segs = null, interest;
+    if (tiers) {
+      segs = tierSegments(days, tiers).map(([d, r]) => ({ days: d, rate: r, paise: divRound(P * toScaled(r, 6) * BigInt(d), 100n * 30n * 1000000n) }));
+      interest = segs.reduce((a, g) => a + g.paise, 0n);
+    } else {
+      const R = toScaled(rate, 6);
+      interest = method === 'daily'
+        ? divRound(P * R * toYear * D, 100n * 365n * 1000000n)               // P × yearly% × days ÷ 36,500
+        : divRound(P * R * D, 100n * 30n * 1000000n * perMonthDiv);          // P × monthly% × days ÷ 3,000
+    }
     const subtotal = P + interest;
     let after = subtotal;
     if (discount !== null) {
@@ -586,7 +672,7 @@
       else { const d = toScaled(discount, 2); after = subtotal - (d > subtotal ? subtotal : d); }
     }
     const total = roundOn && after >= 0n ? divRound(after, 100n) * 100n : after;
-    return { P, interest, subtotal, after, total };
+    return { P, interest, subtotal, after, total, segs };
   };
   // MONEY-ENGINE-END
 
@@ -605,7 +691,8 @@
     if ($('principal').value === '') {
       fail(''); $('err').hidden = true; $('sum').textContent = t('enterAmount'); return;
     }
-    const principal = Number($('principal').value), rate = cfg.rate;
+    const tiered = cfg.mode === 'tiered';
+    const principal = Number($('principal').value), rate = tiered ? cfg.r1 : cfg.rate;
     const start = readFrom(), end = readTo();
     if (start === 'partial') { fail(''); $('err').hidden = true; $('sum').textContent = t('enterFrom'); return; }
     if (end === 'partial') { fail(''); $('err').hidden = true; $('sum').textContent = t('enterTo'); return; }
@@ -614,10 +701,14 @@
     if (end < start) return fail(t('errOrder'));
 
     const days = Math.round((end - start) / 86400000);
-    const basis = cfg.basis;
-    const yearly = basis === 'annual' ? rate : rate * 12;     // % a year
-    const monthly = basis === 'monthly' ? rate : rate / 12;   // % a month
-    const perDay = cfg.method === 'daily' ? principal * yearly / 100 / 365 : principal * monthly / 100 / 30; // display only
+    const tiers = tiered ? { r1: cfg.r1, r2: cfg.r2, r3: cfg.r3 } : null;
+    const segsNow = tiered ? tierSegments(days, tiers) : null;
+    const basis = tiered ? 'monthly' : cfg.basis;
+    const method = tiered ? 'm30' : cfg.method;
+    const rateNow = tiered ? segsNow[segsNow.length - 1][1] : cfg.rate;   // rate for one-rate cases (split shows both)
+    const yearly = basis === 'annual' ? rateNow : rateNow * 12;     // % a year
+    const monthly = basis === 'monthly' ? rateNow : rateNow / 12;   // % a month
+    const perDay = method === 'daily' ? principal * yearly / 100 / 365 : principal * monthly / 100 / 30; // display only
 
     // Discount
     const discOn = !$('discountPanel').hidden && $('discount').value !== '';
@@ -626,7 +717,7 @@
 
     // Exact money in paise; shown as rupees below.
     const roundOn = cfg.round !== false && !(discOn && dtype === 'final');   // round-off is last; skipped for a typed final amount
-    const m = computePaise({ principal: $('principal').value, rate: cfg.rate, basis, method: cfg.method, days, dtype, discount: discOn ? $('discount').value : null, roundOn });
+    const m = computePaise({ principal: $('principal').value, rate: cfg.rate, basis, method, days, dtype, discount: discOn ? $('discount').value : null, roundOn, tiers });
     const rs = p => Number(p) / 100;
     const interest = rs(m.interest), subtotal = rs(m.subtotal), afterDisc = rs(m.after);
     const diff = rs(m.subtotal - m.after);
@@ -648,7 +739,9 @@
     $('total').classList.remove('empty');
     $('roundInfo').textContent = hasRound ? `${t('beforeRound')} ${money(afterDisc)} · ${roundDiff < 0 ? '−' : '+'}${money(Math.abs(roundDiff))}` : '';
     const extra = hasDisc ? `<span class="good">−${money(diff)} ${t('discount').toLowerCase()}</span>` : '';
-    $('sum').innerHTML = `<div>${t('sumLine', { p: `<b>${money(principal)}</b>`, i: `<b class="gold">${money(interest)}</b>` })}</div><div>${periodText(start, end, days, false)}${extra ? ' · ' + extra : ''}</div>`;
+    const split = tiered && segsNow.length === 2;
+    const rateUsed = tiered ? (split ? `${pc(cfg.r1)} + ${pc(cfg.r2)}` : pc(rateNow)) + ` / ${t('monthShort')}` : '';
+    $('sum').innerHTML = `<div>${t('sumLine', { p: `<b>${money(principal)}</b>`, i: `<b class="gold">${money(interest)}</b>` })}</div><div>${periodText(start, end, days, false)}${tiered ? ` · ${L().days(days)} · ${split ? `${pc(cfg.r1)} + ${pc(cfg.r2)}` : pc(rateNow)}` : ''}${extra ? ' · ' + extra : ''}</div>`;
     $('detailsBtn').hidden = false;
 
     // Full bill (behind "Details")
@@ -661,13 +754,18 @@
       line(t('principal'), money(principal)) +
       line(t('dates'), `${pad(start.getDate())}-${monthName(start.getMonth())}-${start.getFullYear()} → ${pad(end.getDate())}-${monthName(end.getMonth())}-${end.getFullYear()}`) +
       line(t('period'), periodText(start, end, days, true)) +
-      line(t('rateLine'), `${cfg.rate}% / ${t(basis === 'annual' ? 'yearShort' : 'monthShort')}`) +
+      line(t('rateLine'), tiered ? rateUsed : `${cfg.rate}% / ${t(basis === 'annual' ? 'yearShort' : 'monthShort')}`) +
       `<h3>${t('secInterest')}</h3>` +
-      line(t('perDay'), moneyFine(perDay)) +
-      line(t('perMonth'), money(perMonth)) +
+      (split ? '' : line(t('perDay'), moneyFine(perDay)) + line(t('perMonth'), money(perMonth))) +
       line(t('interest'), money(interest), 'gold') +
       // Bank formula in labelled steps: yearly rate, then Principal × yearly% × days ÷ 36,500 (100 for %, 365 days).
-      `<div class="work"><small>${t('working')}</small>` + (cfg.method === 'daily'
+      `<div class="work"><small>${t('working')}</small>` + (tiered
+        ? `<div class="step note">${t(days <= 90 ? 'tierAll90' : days <= 180 ? 'tierSplit' : days <= 365 ? 'tierAll180' : 'tierAll365', { ...tierVars(cfg), d: days <= 180 ? days - 90 : days })}</div>` +
+          `<div class="step">${t('stepFormula30')}</div>` +
+          m.segs.map(g => `<div class="step res">${num(principal)} × ${+g.rate} × ${g.days} ÷ 3,000 = ${money(rs(g.paise))}</div>`).join('') +
+          (split ? `<div class="step res">${m.segs.map(g => money(rs(g.paise))).join(' + ')} = ${money(interest)}</div>` : '') +
+          `<div class="step why">${t('why3000')}</div>`
+        : method === 'daily'
         ? (basis === 'monthly' ? `<div class="step">${t('stepYear', { m: +monthly.toFixed(4), y: +yearly.toFixed(4) })}</div>` : '') +
           `<div class="step">${t('stepFormulaDaily')}</div>` +
           `<div class="step res">${num(principal)} × ${+yearly.toFixed(4)} × ${days} ÷ 36,500 = ${money(interest)}</div>` +
@@ -682,7 +780,7 @@
       (hasDisc && hasRound ? line(t('afterDiscount'), money(afterDisc)) : '') +
       (hasRound ? line(t('roundoff'), sign(roundDiff)) : '') +
       line(t('totalToPay'), money(total), 'grand') +
-      `<p class="note">${t('simple')} ${t({ daily: 'mDailySub', m30: 'm30Sub' }[cfg.method])}</p>`;
+      `<p class="note">${t('simple')} ${t({ daily: 'mDailySub', m30: 'm30Sub' }[method])}</p>`;
   };
   form.addEventListener('input', calc);
   form.addEventListener('change', calc);
@@ -692,7 +790,7 @@
     document.documentElement.lang = lang;
     document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
     document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
-    showCfg();
+    showCfg(); showTierRules();
     showToday();
     calc();
   };

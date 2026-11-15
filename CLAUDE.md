@@ -28,8 +28,16 @@ Tokens are on `:root` in `index.html`; use them, don't hard-code colours.
 
 
 ## Calculation
-Simple interest, using the saved setup (rate, per month/year, **method**). Default: 1.5% per month, **30-day months** (the only method in use).
-**Sun, 15-Nov-2026:** the father's method is a fixed 30-day month (1 month = 30 days, 1 year = 360 days), so `m30` is now the default and only choice. The Exact days radio is shown but `disabled`; `METHODS = ['m30']`, so any saved `daily` setting moves to `m30` on load. Still to come: a tiered rate by duration (up to 90 days 1%, 91–180 days 1.5%, over 180 days 1.5% with no 1% concession backdated, over 365 days 2%). The exact rules are not confirmed yet.
+Simple interest, always with **30-day months** (1 month = 30 days, 1 year = 360 days; the father's method, Sun, 15-Nov-2026). The Exact days radio is shown but `disabled`; `METHODS = ['m30']`, so any saved `daily` setting moves to `m30` on load.
+**Interest type** (`cfg.mode`, chosen in Interest setup):
+- `tiered` **By duration** (the default, including old saved settings with no `mode`). Monthly rates `r1`/`r2`/`r3`, default 1% / 1.5% / 2%. Day limits 90/180/365 are fixed; only the rates can be edited. Rules, confirmed by Stephin:
+  - up to 90 days: all days at r1;
+  - 91–180 days: first 90 days at r1, the rest at r2 (₹1,00,000 × 150 days = ₹3,000 + ₹3,000);
+  - 181–365 days: **all** days at r2; the r1 concession is taken back (so day 180 → 181 jumps ₹7,500 → ₹9,050 per lakh);
+  - over 365 days: **all** days at r3 (whole loan, not just the extra days).
+  `tierSegments()` in the engine does this; each part is rounded to paise and interest is their sum, so the bill lines add up. The rate chip shows "1% → 2% / month"; the summary line shows days and the rate used; Details shows one formula line per part and a sentence saying which rule applied. Per-day and per-month are hidden when the period is split.
+- `fixed` **Fixed**: one rate (`cfg.rate`, per month or per year) for the whole loan, as before.
+Days are end − start (the From day isn't counted twice). At the 180/181 limit one day is worth ₹1,550 per lakh, so check a real past loan against the app.
 Methods (chosen once in Interest setup, saved as `cfg.method`):
 - `daily` **Exact days (like banks, e.g. Federal Bank)**: P × yearly rate × days ÷ 365. A monthly rate is ×12 (1.5%/month = 18%/year). Switched off on Sun, 15-Nov-2026 (the radio is disabled); kept in the code.
 - `m30` **30-day months**: total days ÷ 30 × monthly interest. 12 × 30 = 360, so a real 365-day year counts as 12.17 months, about 1.4% more than daily.
@@ -49,7 +57,7 @@ Floats caused 1-paisa errors (464.985 → 464.98) and wrong ₹1 round-offs (e.g
 - Inputs are read as text and scaled to BigInt (paise; rate × 1e6). Every rounding is half-up, done once, on exact values. No package is needed.
 - Order: interest → subtotal → discount → round-off.
 - `perDay` is display-only, so it stays a float.
-- **Test after any money change:** `python3 -I tests/gen_cases.py /tmp/cases.json && node tests/check_engine.js index.html /tmp/cases.json`. It should print `mismatches: 0 / 60000`. The cases come from exact Python `Fraction` maths.
+- **Test after any money change:** `python3 -I tests/gen_cases.py /tmp/cases.json && node tests/check_engine.js index.html /tmp/cases.json`. It should print `mismatches: 0 / 80000` (60,000 fixed + 20,000 tiered cases, with the limit days 89/90/91/179/180/181/364/365/366 forced in). The cases come from exact Python `Fraction` maths.
 
 ## Amount in words
 Shown at the top of the **Details** sheet, under the total and under the Amount box (to catch typos like 5,00,000 vs 50,000). It was under the big total at first, but that crowded the top (Stephin, Sun, 15-Nov-2026). It uses the Indian system: thousand, lakh, crore, plus paise.
@@ -62,7 +70,7 @@ English, Tamil, Malayalam (EN | த | മ at the top right; choice saved in loca
 ## Dates
 Typed on the number pad, the way the pledge receipt shows it (`DD/MM/YYYY`). It replaced the native picker and then the day/month/year dropdowns; Stephin found both annoying.
 - Slashes are added automatically (`29122025` → `29/12/2025`), and the caret is kept in place on edits/backspace.
-- **No calendar picker.** A custom bottom-sheet calendar (day grid + month/year grid) was built on Sun, 15-Nov-2026 and removed the same day: Stephin found it "confusing" and said to leave pickers out if they're all like that. Don't re-add one without asking.
+- **Calendar button** at the right of each date box (added Sun, 15-Nov-2026 at Stephin's request: "we need date picker also"). It's a see-through native `<input type="date">` over a calendar icon, so a tap opens the phone's own picker; it starts on the typed date (or today) and writes the picked date back into the box as DD/MM/YYYY. Typing still works. A custom bottom-sheet calendar was built and removed earlier the same day as "confusing"; don't bring back a custom one.
 - A 2-digit year (`291225`) is accepted only when leaving the box, then expanded to `29/12/2025`, so typing "2025" doesn't flash 2020 at "20".
 - Under the box: the date in words (`Mon, 29-Dec-2025`), or red "This date does not exist" for 31/02.
 - **To** defaults to a "Today · 15-Nov-2026 ✎" button; tapping it opens the same typed box (prefilled with today) plus a "Use today" link.
