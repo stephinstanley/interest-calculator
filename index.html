@@ -77,6 +77,9 @@
     .bill .line { display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); color:var(--text-2); }
     .bill .line strong { text-align:right; color:var(--ink); }
     .bill .line.gold strong { color:var(--gold-deep); }
+    .dpill { display:inline-block; padding:1px 9px; border-radius:999px; background:var(--gold-tint); color:var(--ink); font-weight:800; white-space:nowrap; box-shadow:inset 0 0 0 1px var(--gold); }
+    .bill .line.part span { display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; color:var(--ink); }
+    .bill .line.part small { color:var(--text-3); font-size:14px; }
     .bill .line.good strong { color:var(--good); }
     .bill .line.grand { border-bottom:0; border-top:2px solid var(--ink); margin-top:4px; padding-top:10px; }
     .bill .line.grand span, .bill .line.grand strong { color:var(--ink); font-weight:800; font-size:18px; }
@@ -363,7 +366,7 @@
       m30: '30-day months', m30Sub: 'Total days ÷ 30 = months.',
       modeLabel: 'Interest type', modeTier: 'By duration', modeFixed: 'Fixed', tierUpTo90: 'Up to 90 days', tierAfter90: 'After 90 days', tierAfter365: 'After 365 days',
       tierRule1: '91–180 days: first 90 days at {a}, the rest at {b}.', tierRule2: 'Over 180 days: all days at {b}.', tierRule3: 'Over 365 days: all days at {c}.', tierRule0: 'Rates are per month. 1 month = 30 days.',
-      tierAll90: 'Up to 90 days, so all days are at {a}.', tierSplit: 'First 90 days at {a}, the other {d} days at {b}.', tierAll180: 'Over 180 days, so all {d} days are at {b}. The {a} for the first 90 days does not apply.', tierAll365: 'Over 365 days, so all {d} days are at {c}.',
+      tierAll90: 'Up to 90 days, so all days are at {a}.', tierSplit: 'First 90 days at {a}, the other {d} days at {b}.', partFirst: 'First {d}', partNext: 'Next {d}', tierAll180: 'Over 180 days, so all {d} days are at {b}. The {a} for the first 90 days does not apply.', tierAll365: 'Over 365 days, so all {d} days are at {c}.',
       monthShort: 'month', yearShort: 'year', setupTitle: 'Interest setup', rateLabel: 'Interest rate',
       setupNote: 'Used for every calculation. Change it only when your rate changes.',
       perMonthLong: 'Per month', perYearLong: 'Per year', save: 'Save', cancel: 'Cancel',
@@ -394,7 +397,7 @@
       m30: '30 நாள் மாதம்', m30Sub: 'மொத்த நாட்கள் ÷ 30 = மாதங்கள்.',
       modeLabel: 'வட்டி வகை', modeTier: 'காலத்தைப் பொறுத்து', modeFixed: 'நிலையான', tierUpTo90: '90 நாட்கள் வரை', tierAfter90: '90 நாட்களுக்குப் பின்', tierAfter365: '365 நாட்களுக்குப் பின்',
       tierRule1: '91–180 நாட்கள்: முதல் 90 நாட்கள் {a}, மீதி {b}.', tierRule2: '180 நாட்களுக்கு மேல்: எல்லா நாட்களும் {b}.', tierRule3: '365 நாட்களுக்கு மேல்: எல்லா நாட்களும் {c}.', tierRule0: 'வட்டி மாதத்திற்கு. 1 மாதம் = 30 நாட்கள்.',
-      tierAll90: '90 நாட்கள் வரை, அதனால் எல்லா நாட்களும் {a}.', tierSplit: 'முதல் 90 நாட்கள் {a}, மீதி {d} நாட்கள் {b}.', tierAll180: '180 நாட்களுக்கு மேல், அதனால் எல்லா {d} நாட்களும் {b}. முதல் 90 நாட்களுக்கான {a} பொருந்தாது.', tierAll365: '365 நாட்களுக்கு மேல், அதனால் எல்லா {d} நாட்களும் {c}.',
+      tierAll90: '90 நாட்கள் வரை, அதனால் எல்லா நாட்களும் {a}.', tierSplit: 'முதல் 90 நாட்கள் {a}, மீதி {d} நாட்கள் {b}.', partFirst: 'முதல் {d}', partNext: 'அடுத்த {d}', tierAll180: '180 நாட்களுக்கு மேல், அதனால் எல்லா {d} நாட்களும் {b}. முதல் 90 நாட்களுக்கான {a} பொருந்தாது.', tierAll365: '365 நாட்களுக்கு மேல், அதனால் எல்லா {d} நாட்களும் {c}.',
       monthShort: 'மாதம்', yearShort: 'ஆண்டு', setupTitle: 'வட்டி அமைப்பு', rateLabel: 'வட்டி விகிதம்',
       setupNote: 'ஒவ்வொரு கணக்கிற்கும் இது பயன்படும். வட்டி மாறினால் மட்டும் மாற்றவும்.',
       perMonthLong: 'மாதத்திற்கு', perYearLong: 'ஆண்டுக்கு', save: 'சேமி', cancel: 'ரத்து',
@@ -425,7 +428,7 @@
       m30: '30 ദിവസ മാസം', m30Sub: 'ആകെ ദിവസം ÷ 30 = മാസം.',
       modeLabel: 'പലിശ തരം', modeTier: 'കാലാവധി പ്രകാരം', modeFixed: 'സ്ഥിരം', tierUpTo90: '90 ദിവസം വരെ', tierAfter90: '90 ദിവസത്തിന് ശേഷം', tierAfter365: '365 ദിവസത്തിന് ശേഷം',
       tierRule1: '91–180 ദിവസം: ആദ്യ 90 ദിവസം {a}, ബാക്കി {b}.', tierRule2: '180 ദിവസം കഴിഞ്ഞാൽ: എല്ലാ ദിവസവും {b}.', tierRule3: '365 ദിവസം കഴിഞ്ഞാൽ: എല്ലാ ദിവസവും {c}.', tierRule0: 'നിരക്ക് മാസത്തിന്. 1 മാസം = 30 ദിവസം.',
-      tierAll90: '90 ദിവസം വരെ, അതിനാൽ എല്ലാ ദിവസവും {a}.', tierSplit: 'ആദ്യ 90 ദിവസം {a}, ബാക്കി {d} ദിവസം {b}.', tierAll180: '180 ദിവസം കഴിഞ്ഞു, അതിനാൽ എല്ലാ {d} ദിവസവും {b}. ആദ്യ 90 ദിവസത്തെ {a} ബാധകമല്ല.', tierAll365: '365 ദിവസം കഴിഞ്ഞു, അതിനാൽ എല്ലാ {d} ദിവസവും {c}.',
+      tierAll90: '90 ദിവസം വരെ, അതിനാൽ എല്ലാ ദിവസവും {a}.', tierSplit: 'ആദ്യ 90 ദിവസം {a}, ബാക്കി {d} ദിവസം {b}.', partFirst: 'ആദ്യ {d}', partNext: 'അടുത്ത {d}', tierAll180: '180 ദിവസം കഴിഞ്ഞു, അതിനാൽ എല്ലാ {d} ദിവസവും {b}. ആദ്യ 90 ദിവസത്തെ {a} ബാധകമല്ല.', tierAll365: '365 ദിവസം കഴിഞ്ഞു, അതിനാൽ എല്ലാ {d} ദിവസവും {c}.',
       monthShort: 'മാസം', yearShort: 'വർഷം', setupTitle: 'പലിശ ക്രമീകരണം', rateLabel: 'പലിശ നിരക്ക്',
       setupNote: 'എല്ലാ കണക്കിനും ഇത് ഉപയോഗിക്കും. നിരക്ക് മാറിയാൽ മാത്രം മാറ്റുക.',
       perMonthLong: 'മാസത്തിന്', perYearLong: 'വർഷത്തിന്', save: 'സേവ് ചെയ്യുക', cancel: 'റദ്ദാക്കുക',
@@ -771,6 +774,7 @@
 
     // Full bill (behind "Details")
     const perMonth = principal * monthly / 100;
+    const dpill = n => `<b class="dpill">${L().days(n)}</b>`;
     const line = (k, v, cls = '') => `<div class="line ${cls}"><span>${k}</span><strong>${v}</strong></div>`;
     const sign = n => (n < 0 ? '−' : '+') + money(Math.abs(n));
     $('bill').innerHTML =
@@ -778,10 +782,12 @@
       `<h3>${t('secLoan')}</h3>` +
       line(t('principal'), money(principal)) +
       line(t('dates'), `${pad(start.getDate())}-${monthName(start.getMonth())}-${start.getFullYear()} → ${pad(end.getDate())}-${monthName(end.getMonth())}-${end.getFullYear()}`) +
-      line(t('period'), periodText(start, end, days, true)) +
+      line(t('period'), (pt => (pt === L().days(days) ? '' : pt + ' ') + dpill(days))(periodText(start, end, days, false))) +
       line(t('rateLine'), tiered ? rateUsed : `${cfg.rate}% / ${t(basis === 'annual' ? 'yearShort' : 'monthShort')}`) +
       `<h3>${t('secInterest')}</h3>` +
-      (split ? '' : line(t('perDay'), moneyFine(perDay)) + line(t('perMonth'), money(perMonth))) +
+      (split
+        ? m.segs.map((g, i) => line(`${t(i ? 'partNext' : 'partFirst', { d: dpill(g.days) })} <small>@ ${pc(+g.rate)} / ${t('monthShort')}</small>`, money(rs(g.paise)), 'part')).join('')
+        : line(t('perDay'), moneyFine(perDay)) + line(t('perMonth'), money(perMonth))) +
       line(t('interest'), money(interest), 'gold') +
       // Bank formula in labelled steps: yearly rate, then Principal × yearly% × days ÷ 36,500 (100 for %, 365 days).
       `<div class="work"><small>${t('working')}</small>` + (tiered

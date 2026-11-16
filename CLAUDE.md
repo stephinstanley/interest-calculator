@@ -37,7 +37,7 @@ Simple interest, always with **30-day months** (1 month = 30 days, 1 year = 360 
   - 91–180 days: first 90 days at r1, the rest at r2 (₹1,00,000 × 150 days = ₹3,000 + ₹3,000);
   - 181–365 days: **all** days at r2; the r1 concession is taken back (so day 180 → 181 jumps ₹7,500 → ₹9,050 per lakh);
   - over 365 days: **all** days at r3 (whole loan, not just the extra days).
-  `tierSegments()` in the engine does this; each part is rounded to paise and interest is their sum, so the bill lines add up. The rate chip shows "1% → 2% / month"; the summary line shows days and the rate used; Details shows one formula line per part and a sentence saying which rule applied. Per-day and per-month are hidden when the period is split.
+  `tierSegments()` in the engine does this; each part is rounded to paise and interest is their sum, so the bill lines add up. The rate chip shows "1% → 2% / month"; the summary line shows days and the rate used; Details shows one formula line per part and a sentence saying which rule applied. When the period is split, Details shows one row per part instead of per-day and per-month: "First [90 days] @ 1% / month ₹3,000" and "Next [60 days] @ 1.5% / month ₹3,000", then the Interest total (Stephin, Mon, 16-Nov-2026). Day counts are highlighted as gold-tint pills (`.dpill`), also on the Period line ("4 months 28 days [150 days]").
 - `fixed` **Fixed**: one rate (`cfg.rate`, per month or per year) for the whole loan, as before.
 Days are end − start (the From day isn't counted twice). At the 180/181 limit one day is worth ₹1,550 per lakh, so check a real past loan against the app.
 Methods (chosen once in Interest setup, saved as `cfg.method`):
