@@ -1,4 +1,6 @@
-# Interest Calculator PWA
+# Interest Calculator PWA (app name: SSF)
+
+The app is called **SSF** (S.S. Finance) since Mon, 16-Nov-2026: page title, home-screen name, header and all three languages.
 
 Plain HTML/CSS/JS installable web app (no build step) for working out simple interest owed on a personal loan. Used on phones via "Add to Home Screen" instead of an app store.
 
@@ -6,7 +8,7 @@ Plain HTML/CSS/JS installable web app (no build step) for working out simple int
 - `index.html` — the whole app (markup, styles, script).
 - `manifest.json` — install metadata and icons.
 - `sw.js` — offline support. Network-first, so fixes reach installed phones on the next online launch. Bump `CACHE` when the `FILES` list changes.
-- `icons/icon.svg` — icon source. PNGs made with `qlmanage -t -s 512` and `sips -z` (no ImageMagick on this Mac).
+- `icons/logo-source.png` — the app icon source (Mon, 16-Nov-2026): the maroon S.S. Finance "ff" monogram from the pledge receipt, redrawn by ChatGPT for Stephin. The PNG icons are it padded to a white 1500×1500 square (`sips --padToHeightWidth 1500 1500 --padColor FFFFFF`), then `sips -z` to 512/192/180. `icons/logo-mark.png` (58×96, cropped from the source) is the header mark next to "SSF"; its white background disappears on the ivory page through `mix-blend-mode:multiply`. `icons/icon.svg` (old gold ₹ coin) is no longer used. No ImageMagick on this Mac; `qlmanage` hangs, so don't use it.
 
 ## Screen design (redesigned Sun, 15-Nov-2026)
 Mobile first: mobile is the main platform. Everything fits on one phone screen with no scrolling (checked at 360×640, 390×760 and 412 wide, in all three languages). Stephin asked for less scrolling and no person's name.
@@ -24,7 +26,7 @@ Tokens are on `:root` in `index.html`; use them, don't hard-code colours.
 - **Ink** `#1A1814` is for structure, text, the answer card, primary buttons and selected states (an ink pill with gold text).
 - **Gold** is only for money and focus. `--gold-hi` `#F2D27E` is the total and interest on ink; `--gold-deep` `#85600F` is links, chips and ₹/% signs on light; `--gold` `#C9972B` is the focus ring and hairlines.
 - **Green** `--good` is money saved (discount). **Red** `--bad` is errors. The background is warm ivory `#F7F4EC` with white cards.
-- Text contrast passes WCAG AA (4.5:1) everywhere. The icon is a gold ₹ coin on ink (`icons/icon.svg`).
+- Text contrast passes WCAG AA (4.5:1) everywhere. The icon is the maroon ff monogram on white (`icons/logo-source.png`); maroon isn't a theme token.
 
 
 ## Calculation

@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#F7F4EC">
-  <title>Interest Calculator</title>
+  <title>SSF</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Interest Calc">
+  <meta name="apple-mobile-web-app-title" content="SSF">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <style>
     /* ===== Design tokens: "Ink & Gold" =====
@@ -36,7 +36,7 @@
     /* Top bar */
     .top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
     .brand { display:flex; align-items:center; gap:9px; min-width:0; }
-    .mark { flex:none; width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:radial-gradient(circle at 35% 30%, #F6DE9A, var(--gold) 70%); color:var(--ink); font-weight:800; font-size:18px; box-shadow:inset 0 0 0 1px #00000014; }
+    .mark { flex:none; width:auto; height:34px; display:block; mix-blend-mode:multiply; }
     h1 { font-size:19px; margin:0; color:var(--ink); font-weight:750; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .langs { display:flex; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:3px; flex:none; box-shadow:var(--shadow); }
     .langs button { border:0; background:none; color:var(--text-2); font-weight:700; font-size:15px; min-width:38px; min-height:34px; padding:0 8px; border-radius:16px; }
@@ -211,7 +211,7 @@
 <body>
 <main>
   <div class="top">
-    <div class="brand"><span class="mark" aria-hidden="true">₹</span><h1 data-t="title">Interest Calculator</h1></div>
+    <div class="brand"><img class="mark" src="icons/logo-mark.png" alt="" aria-hidden="true"><h1 data-t="title">SSF</h1></div>
     <div class="langs" role="group" aria-label="Language">
       <button type="button" data-lang="en" lang="en" aria-label="English">EN</button>
       <button type="button" data-lang="ta" lang="ta" aria-label="தமிழ்">த</button>
@@ -343,7 +343,7 @@
   // ---------- Text in three languages ----------
   const I18N = {
     en: {
-      title: 'Interest Calculator', totalToPay: 'Total to pay', details: 'View details', detailsTitle: 'Details', secLoan: 'Loan', secInterest: 'Interest', secSettle: 'Settlement', dates: 'Dates', rateLine: 'Rate', amountPlusInterest: 'Amount + interest',
+      title: 'SSF', totalToPay: 'Total to pay', details: 'View details', detailsTitle: 'Details', secLoan: 'Loan', secInterest: 'Interest', secSettle: 'Settlement', dates: 'Dates', rateLine: 'Rate', amountPlusInterest: 'Amount + interest',
       amount: 'Amount', rate: 'Interest', monthly: 'Month', annual: 'Year', full: 'Once',
       from: 'From', to: 'To', today: 'Today', useToday: 'Use today', badDate: 'This date does not exist', errMonth: 'Month must be 1 to 12', errDayIn: '{m} has only {n} days',
       enterFrom: 'Type the From date (e.g. 29/12/2025)', enterTo: 'Type the To date',
@@ -374,7 +374,7 @@
       errFinal: 'Final amount is more than the total.'
     },
     ta: {
-      title: 'வட்டி கணக்கீடு', totalToPay: 'செலுத்த வேண்டிய மொத்தம்', details: 'விவரங்களைப் பார்', detailsTitle: 'விவரங்கள்', secLoan: 'கடன்', secInterest: 'வட்டி', secSettle: 'இறுதி கணக்கு', dates: 'தேதிகள்', rateLine: 'வட்டி விகிதம்', amountPlusInterest: 'தொகை + வட்டி',
+      title: 'SSF', totalToPay: 'செலுத்த வேண்டிய மொத்தம்', details: 'விவரங்களைப் பார்', detailsTitle: 'விவரங்கள்', secLoan: 'கடன்', secInterest: 'வட்டி', secSettle: 'இறுதி கணக்கு', dates: 'தேதிகள்', rateLine: 'வட்டி விகிதம்', amountPlusInterest: 'தொகை + வட்டி',
       amount: 'தொகை', rate: 'வட்டி', monthly: 'மாதம்', annual: 'ஆண்டு', full: 'ஒருமுறை',
       from: 'முதல்', to: 'வரை', today: 'இன்று', useToday: 'இன்றைய தேதி', badDate: 'இந்த தேதி இல்லை', errMonth: 'மாதம் 1 முதல் 12 வரை', errDayIn: '{m} மாதத்தில் {n} நாட்கள் மட்டுமே',
       enterFrom: '"முதல்" தேதியை உள்ளிடுங்கள் (எ.கா. 29/12/2025)', enterTo: '"வரை" தேதியை உள்ளிடுங்கள்',
@@ -405,7 +405,7 @@
       errFinal: 'இறுதித் தொகை மொத்தத்தை விட அதிகம்.'
     },
     ml: {
-      title: 'പലിശ കണക്കുകൂട്ടൽ', totalToPay: 'നൽകേണ്ട ആകെ തുക', details: 'വിശദാംശങ്ങൾ കാണുക', detailsTitle: 'വിശദാംശങ്ങൾ', secLoan: 'വായ്പ', secInterest: 'പലിശ', secSettle: 'അന്തിമ കണക്ക്', dates: 'തീയതികൾ', rateLine: 'പലിശ നിരക്ക്', amountPlusInterest: 'തുക + പലിശ',
+      title: 'SSF', totalToPay: 'നൽകേണ്ട ആകെ തുക', details: 'വിശദാംശങ്ങൾ കാണുക', detailsTitle: 'വിശദാംശങ്ങൾ', secLoan: 'വായ്പ', secInterest: 'പലിശ', secSettle: 'അന്തിമ കണക്ക്', dates: 'തീയതികൾ', rateLine: 'പലിശ നിരക്ക്', amountPlusInterest: 'തുക + പലിശ',
       amount: 'തുക', rate: 'പലിശ', monthly: 'മാസം', annual: 'വർഷം', full: 'ഒരിക്കൽ',
       from: 'മുതൽ', to: 'വരെ', today: 'ഇന്ന്', useToday: 'ഇന്നത്തെ തീയതി', badDate: 'ഈ തീയതി നിലവിലില്ല', errMonth: 'മാസം 1 മുതൽ 12 വരെ', errDayIn: '{m} മാസത്തിൽ {n} ദിവസം മാത്രം',
       enterFrom: '"മുതൽ" തീയതി നൽകുക (ഉദാ. 29/12/2025)', enterTo: '"വരെ" തീയതി നൽകുക',

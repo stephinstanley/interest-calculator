@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Interest Calculator",
-  "short_name": "Interest Calc",
+  "name": "SSF",
+  "short_name": "SSF",
   "description": "Calculate simple interest and total amount due.",
   "start_url": "./",
   "scope": "./",
