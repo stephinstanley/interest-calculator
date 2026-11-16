@@ -1,6 +1,6 @@
 // Bump CACHE when the file list changes. Pages use network-first, so code
 // fixes reach installed phones on the next online launch without a bump.
-const CACHE = "interest-calculator-v7";
+const CACHE = "interest-calculator-v8";
 const FILES = [
   "./",
   "./index.html",
@@ -8,7 +8,9 @@ const FILES = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png",
-  "./icons/logo-mark.png"
+  "./icons/logo-mark.png",
+  "./icons/icon-maskable-192.png",
+  "./icons/icon-maskable-512.png"
 ];
 
 self.addEventListener("install", event => {
